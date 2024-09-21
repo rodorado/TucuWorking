@@ -78,15 +78,42 @@ const borrarUnaSala = (idSala) => {
   }
 };
 
-const cambiarDisponibilidad = (idSala) =>{
-    try {
-        const posicionSala = salas.findIndex((sala)=> sala.idSala === idSala)
-        salas[posicionSala].Disponible = !salas[posicionSala].Disponible
-        const mensaje = salas[posicionSala].Disponible ? 'Sala no disponible' : 'Sala disponible'
-        return mensaje;
-    } catch (error) {
-       console.log(error) 
-    }
+/*const cambiarDisponibilidad = (idSala) => {
+  try {
+      const posicionSala = salas.findIndex((sala) => sala.idSala === idSala);
+      if (posicionSala !== -1) {  // Asegúrate de que se encontró la sala
+          salas[posicionSala].Disponible = !salas[posicionSala].Disponible;
+          const mensaje = salas[posicionSala].Disponible ? 'Sala disponible' : 'Sala no disponible';
+          return mensaje;
+      } else {
+          return 'Sala no encontrada';
+      }
+  } catch (error) {
+      console.log(error);
+  }
+};*/
+const habilitarSala = async (idSala) =>{ 
+  const sala = await salas.findById(idSala)
+  sala.bloqueado = false
+  await sala.save()
+
+  return {
+    msg: 'Sala habilitada',
+    statusCode: 200
+
+  }
+}
+
+const deshabilitarSala = async (idSala) =>{ 
+  const sala = await salas.findById(idSala)
+  sala.bloqueado = true
+  await sala.save()
+
+  return {
+    msg: 'Sala deshabilitada',
+    statusCode: 200
+    
+  }
 }
 
 module.exports = {
@@ -95,5 +122,6 @@ module.exports = {
   crearSala,
   editarUnaSala,
   borrarUnaSala,
-  cambiarDisponibilidad
+  habilitarSala,
+  deshabilitarSala
 };

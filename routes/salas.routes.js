@@ -1,5 +1,5 @@
 const express = require("express");
-const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, disponibilidadDeUnaSala } = require("../controllers/salas.controllers");
+const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala } = require("../controllers/salas.controllers");
 const router = express.Router();
 
 //GET
@@ -13,6 +13,8 @@ router.put("/:idSala", editarUnaSala);
 
 //DELETE
 router.delete("/:idSala", borrarUnaSala);
-router.put("/:idSala", disponibilidadDeUnaSala)
+
+router.put('/habilitar/:idProducto', habilitarSala)
+router.put('/deshabilitar/:idProducto', deshabilitarUnaSala)
 
 module.exports = router;

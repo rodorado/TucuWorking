@@ -62,15 +62,49 @@ const borrarUnaSala = (req, res) => {
 };
 
 //Controlador de borrado logico para cambiar la disponibilidad de la sala
-const disponibilidadDeUnaSala = (req, res) =>{
+/*const disponibilidadDeUnaSala = (req, res) => {
   try {
     const id = req.params.idSala;
-    const result = salasServices.cambiarDisponibilidad(id)
-    res.status(200).json(result)
+
+    // Asegurarse de que el id no es undefined o null
+    if (!id) {
+      return res.status(400).json({ error: "ID de sala no proporcionado" });
+    }
+
+    const result = salasServices.cambiarDisponibilidad(id);
+
+    if (result) {
+      // En caso de éxito
+      return res.status(200).json({ message: result });
+    } else {
+      // Si cambiarDisponibilidad devuelve un resultado vacío o nulo
+      return res.status(404).json({ error: "Sala no encontrada" });
+    }
+
   } catch (error) {
-    res.status(500).json({error: "no se encontró la sala"})
+    // Captura cualquier otro error
+    return res.status(500).json({ error: "Error interno del servidor" });
   }
+};*/
+
+const habilitarSala = async(req, res) => {
+  const result =  await salasServices.habilitarSala(req.params.idSala)
+  if(result.statusCode === 200){
+    res.status(200).json({msg: result.msg})
+   }else{
+    res.status(500).json({msg: result.msg})
+   }
 }
+
+const deshabilitarUnaSala = async(req, res) => {
+  const result =  await salasServices.deshabilitarSala(req.params.idSala)
+  if(result.statusCode === 200){
+    res.status(200).json({msg: result.msg})
+   }else{
+    res.status(500).json({msg: result.msg})
+   }
+}
+
 
 
 module.exports = {
@@ -78,6 +112,7 @@ module.exports = {
   crearUnaSala,
   editarUnaSala,
   borrarUnaSala,
-  disponibilidadDeUnaSala
+  habilitarSala,
+  deshabilitarUnaSala
 };
 
