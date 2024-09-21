@@ -14,7 +14,7 @@ router.put("/:idSala", editarUnaSala);
 //DELETE
 router.delete("/:idSala", borrarUnaSala);
 
-router.put('/habilitar/:idProducto', habilitarSala)
-router.put('/deshabilitar/:idProducto', deshabilitarUnaSala)
+router.put('/habilitar/:idSala', habilitarSala)
+router.put('/deshabilitar/:idSala', deshabilitarUnaSala)
 
 module.exports = router;
