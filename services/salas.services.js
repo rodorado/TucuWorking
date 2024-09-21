@@ -17,6 +17,7 @@
   },
 ];*/
 
+const SalasModels = require('../models/salas.schemas');
 const SalasModel = require('../models/salas.schemas')
 
 
@@ -102,7 +103,7 @@ const borrarUnaSala = async(idSala) => {
   }
 };*/
 const habilitarSala = async (idSala) =>{ 
-  const sala = await salas.findById(idSala)
+  const sala = await SalasModels.findById(idSala)
   sala.bloqueado = false
   await sala.save()
 
@@ -114,7 +115,7 @@ const habilitarSala = async (idSala) =>{
 }
 
 const deshabilitarSala = async (idSala) =>{ 
-  const sala = await salas.findById(idSala)
+  const sala = await SalasModels.findById(idSala)
   sala.bloqueado = true
   await sala.save()
 
