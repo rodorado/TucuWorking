@@ -2,19 +2,19 @@ const salasServices = require("../services/salas.services");
 
 
 // Controlador para obtener una sala por id o todas
-const obtenerUnaSalaPorIdOTodos = (req, res) => {
+const obtenerUnaSalaPorIdOTodos = async(req, res) => {
   try {
-    const id = req.params.idSala ? Number(req.params.idSala) : null;
+    const id = req.params.idSala ? req.params.idSala : null;
 
     if (id !== null) {
-      const sala = salasServices.obtenerUnaSala(id);
+      const sala = await salasServices.obtenerUnaSala(id);
       if (sala) {
         res.status(200).json(sala);
       } else {
         res.status(404).json({ mensaje: "Sala no encontrada" });
       }
     } else {
-      const salas = salasServices.obtenerTodasLasSalas();
+      const salas = await salasServices.obtenerTodasLasSalas();
       res.status(200).json(salas);
     }
   } catch (error) {
@@ -23,9 +23,10 @@ const obtenerUnaSalaPorIdOTodos = (req, res) => {
 };
 
 // Controlador para crear una nueva sala
-const crearUnaSala = (req, res) => {
+const crearUnaSala = async(req, res) => {
   try {
-    const nuevaSala = salasServices.crearSala(req.body);
+    const nuevaSala = await salasServices.crearSala(req.body);
+    await nuevaSala.save()
     res.status(201).json(nuevaSala);
   } catch (error) {
     res.status(500).json({ error: "Error al crear la sala" });
@@ -33,12 +34,12 @@ const crearUnaSala = (req, res) => {
 };
 
 // Controlador para editar una sala
-const editarUnaSala = (req, res) => {
+const editarUnaSala = async(req, res) => {
   try {
-    const id = Number(req.params.idSala);
+    const id = req.params.idSala;
     const data = req.body;
 
-    const salaEditada = salasServices.editarUnaSala(id, data);
+    const salaEditada = await salasServices.editarUnaSala(id, data);
 
     if (salaEditada) {
       res.status(200).json(salaEditada);
@@ -51,10 +52,10 @@ const editarUnaSala = (req, res) => {
 };
 
 // Controlador para borrar una sala
-const borrarUnaSala = (req, res) => {
+const borrarUnaSala = async (req, res) => {
   try {
-    const id = Number(req.params.idSala);
-    const resultado = salasServices.borrarUnaSala(id);
+    const id = req.params.idSala;
+    const resultado = await salasServices.borrarUnaSala(id);
     res.status(200).json({ msg: "Sala borrada con exito", resultado });
   } catch (error) {
     res.status(500).json({ error: "Error al borrar la sala" });
