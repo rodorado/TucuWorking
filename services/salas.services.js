@@ -103,8 +103,8 @@ const borrarUnaSala = async(idSala) => {
   }
 };*/
 const habilitarSala = async (idSala) =>{ 
-  const sala = await SalasModels.findById(idSala)
-  sala.bloqueado = false
+  const sala = await SalasModel.findById(idSala)
+  sala.disponibilidad = false
   await sala.save()
 
   return {
@@ -115,8 +115,8 @@ const habilitarSala = async (idSala) =>{
 }
 
 const deshabilitarSala = async (idSala) =>{ 
-  const sala = await SalasModels.findById(idSala)
-  sala.bloqueado = true
+  const sala = await SalasModel.findById(idSala)
+  sala.disponibilidad = true
   await sala.save()
 
   return {
