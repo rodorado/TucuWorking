@@ -108,6 +108,8 @@ const deshabilitarUnaSala = async(req, res) => {
 
 
 
+
+
 module.exports = {
   obtenerUnaSalaPorIdOTodos,
   crearUnaSala,

@@ -103,28 +103,37 @@ const borrarUnaSala = async(idSala) => {
   }
 };*/
 const habilitarSala = async (idSala) =>{ 
-  const sala = await SalasModel.findById(idSala)
-  sala.disponibilidad = false
-  await sala.save()
+  const sala = await SalasModel.findById(idSala);
+
+  if (!sala) {
+    throw new Error('Sala no encontrada');
+  }
+
+  sala.disponibilidad = true;
+  await sala.save();
 
   return {
     msg: 'Sala habilitada',
     statusCode: 200
-
-  }
-}
+  };
+};
 
 const deshabilitarSala = async (idSala) =>{ 
-  const sala = await SalasModel.findById(idSala)
-  sala.disponibilidad = true
-  await sala.save()
+  const sala = await SalasModel.findById(idSala);
+
+  if (!sala) {
+    throw new Error('Sala no encontrada');
+  }
+
+  sala.disponibilidad = true;
+  await sala.save();
 
   return {
     msg: 'Sala deshabilitada',
     statusCode: 200
-    
-  }
-}
+  };
+};
+
 
 module.exports = {
   obtenerTodasLasSalas,
