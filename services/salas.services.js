@@ -1,22 +1,3 @@
-/*let salas = [
-  {
-    id: 1,
-    nombre: "Sala 1",
-    tipo: "privada",
-    capacidad: 10,
-    precio: 5000,
-    Disponible: false,
-  },
-  {
-    id: 2,
-    nombre: "Sala 2",
-    tipo: "compartida",
-    capacidad: 10,
-    precio: 5000,
-    Disponible: false,
-  },
-];*/
-
 const SalasModel = require('../models/salas.schemas')
 
 
@@ -35,12 +16,6 @@ const crearSala = (body) => {
   try {
     const newSala = new SalasModel(body)
     return newSala
-    /*const nuevaSala = {
-      id: salas.length > 0 ? salas[salas.length - 1].id + 1 : 1, Disponible: false,
-      ...body,
-    };
-    salas.push(nuevaSala);
-    return nuevaSala;*/
   } catch (error) {
     console.log(error);
   }
@@ -51,21 +26,6 @@ const editarUnaSala = async (idSala, data) => {
   try {
       const salaModificada = await SalasModel.findByIdAndUpdate({_id: idSala}, data, {new: true})
       return salaModificada
-    /*const posicionSala = salas.findIndex(
-      (sala) => sala.id === idSala
-    );
-
-    if (posicionSala === -1) {
-      return null;
-    }
-    const salaEditada = {
-      ...salas[posicionSala],
-      ...data,
-    };
-
-    salas[posicionSala] = salaEditada;
-
-    return salaEditada;*/
   } catch (error) {
     console.log(error);
     return null;
@@ -77,11 +37,6 @@ const borrarUnaSala = async(idSala) => {
   try {
     await SalasModel.findByIdAndDelete({_id: idSala})
     return 200
-    /*const posicionSalaEnElArray = salas.findIndex(
-      (sala) => sala.id === idSala
-    );
-    salas.splice(posicionSalaEnElArray, 1);
-    return 200;*/
   } catch (error) {
     console.log(error);
   }
