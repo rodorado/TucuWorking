@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors")
 require('dotenv').config();
+const morgan = require('morgan')
 
 
 class Server {
@@ -19,6 +20,7 @@ class Server {
     this.app.use(express.json());
     this.app.use(express.static(path.join(__dirname, "public")));
     this.app.use(cors())
+    this.app.use(morgan('dev'))
   }
 
   routes(){
