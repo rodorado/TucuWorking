@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const usuarioModel = require("../models/usuarios.schemas");
-
+const bcrypt = require("bcrypt")
 
 const traerTodosLosUsuarios = async() => {
   try {
@@ -21,11 +21,43 @@ const traerUnUsuario = async(id) => {
 };
 const añadirUnUsuario = async (body) => {
   try {
-    const user = new usuarioModel(body);  // Creas una nueva instancia del usuario
-    await user.save();  // Guardas el usuario en la base de datos
-    return { error: false, msg: "Usuario registrado con éxito", usuario: user };  // Devuelves el usuario guardado
+   
+    const usuarioExiste = await usuarioModel.findOne({ email: body.email })
+
+    if (usuarioExiste) {
+      return { error: true, msg: "Error al registrar usuario", detalle: error };
+    }
+
+    let salt = bcrypt.genSaltSync();
+    body.contrasenia = bcrypt.hashSync(body.contrasenia, salt);
+  
+    const user = new usuarioModel(body); 
+    await user.save();  
+    return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
   } catch (error) {
     return { error: true, msg: "Error al registrar usuario", detalle: error };
+  }
+};
+
+const inicioSesion = async (body) => {
+  try {
+    
+    const usuarioExiste = await usuarioModel.findOne({ email: body.email });
+
+    if (!usuarioExiste) {
+      return { code: 400, msg: "Email incorrecto" };
+    }
+
+    const verificacionContrasenia = bcrypt.compareSync(body.contrasenia, usuarioExiste.contrasenia);
+
+    if (verificacionContrasenia) {
+      return { code: 200, msg: "Inicio de sesión exitoso", usuario: usuarioExiste };
+    } else {
+      return { code: 400, msg: "Contraseña incorrecta" };
+    }
+  } catch (error) {
+    console.log(error);
+    return { code: 500, msg: "Error en el servidor", error: error.message };
   }
 };
 
@@ -76,4 +108,5 @@ module.exports = {
   borradoFisicoUsuario,
   borradoLogicoUsuario,
   modificarUsuario,
+  inicioSesion,
 };

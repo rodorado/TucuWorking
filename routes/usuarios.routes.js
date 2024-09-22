@@ -1,5 +1,5 @@
 const express = require("express")
-const { registrarUsuario, obtenerTodosLosUsuarios, obtenerUsuario, bajaFisicaUsuario, bajaLogicaUsuario, editarUsuario } = require("../controllers/usuarios.controllers")
+const { registrarUsuario, obtenerTodosLosUsuarios, obtenerUsuario, bajaFisicaUsuario, bajaLogicaUsuario, editarUsuario, inciarSesionUsuario } = require("../controllers/usuarios.controllers")
 const router = express.Router()
 
 //GET
@@ -8,6 +8,7 @@ router.get("/:idUsuario", obtenerUsuario)
 
 //POST
 router.post("/", registrarUsuario)
+router.post("/login", inciarSesionUsuario)
 
 //PUT Editar
 router.put("/:idUsuario", editarUsuario)
