@@ -36,6 +36,26 @@ const registrarUsuario = async(req, res) => {
   }
 };
 
+//Login
+const inciarSesionUsuario = async (req, res) => {
+  try {
+    const result = await usuariosServices.inicioSesion(req.body);
+
+    if (result.code === 400) {
+      res.status(400).json({ msg: result.msg });
+    } else if (result.code === 200) {
+      res.status(200).json({ msg: result.msg });
+    } else {
+      res.status(500).json({ msg: result.msg });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor", error });
+  }
+};
+
+
+
 //PUT EDITAR USUARIO
 const editarUsuario = async (req, res) => {
   try {
@@ -81,4 +101,5 @@ module.exports = {
   bajaFisicaUsuario,
   bajaLogicaUsuario,
   editarUsuario,
+  inciarSesionUsuario,
 };
