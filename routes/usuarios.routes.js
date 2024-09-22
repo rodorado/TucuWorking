@@ -13,7 +13,7 @@ router.post("/", registrarUsuario)
 router.put("/:idUsuario", editarUsuario)
 
 //Baja logica
-router.put("/:idUsuario", bajaLogicaUsuario)
+router.put("/:idUsuario/borradoLogico", bajaLogicaUsuario)
 
 //Baja Fisica
 router.delete("/:idUsuario", bajaFisicaUsuario)

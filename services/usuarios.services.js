@@ -50,17 +50,24 @@ const borradoFisicoUsuario = async(idUsuario) => {
   }
 };
 
-const borradoLogicoUsuario = async(idUsuario) => {
+const borradoLogicoUsuario = async (idUsuario) => {
   try {
-    const usuario = await usuarioModel.findOne({ _id: idUsuario })
-    usuario.bloqueado = !usuario.bloqueado
-  
-    const actualizarUsuario = await usuarioModel.findByIdAndUpdate({ _id: idUsuario }, usuario, { new: true })
-    return actualizarUsuario
+    const usuario = await usuarioModel.findOne({ _id: idUsuario });
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    usuario.bloqueado = !usuario.bloqueado; // Cambia el estado de bloqueado
+    const actualizarUsuario = await usuario.save(); // Guarda el usuario modificado
+
+    return actualizarUsuario;
   } catch (error) {
     console.log(error);
+    throw new Error('Error al realizar el borrado lógico');
   }
 };
+
 
 module.exports = {
   traerTodosLosUsuarios,
