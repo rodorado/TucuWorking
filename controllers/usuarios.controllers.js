@@ -85,14 +85,17 @@ const bajaFisicaUsuario = async(req, res) => {
 };
 
 //DELETE logico
-const bajaLogicaUsuario = async(req, res) => {
+const bajaLogicaUsuario = async(req, res) => { 
   try {
-    const usuario = await serviceUsuario.borradoLogicoUsuario(req.params.idUsuario)
-    res.status(200).json({ usuario })
+    const usuario = await usuariosServices.borradoLogicoUsuario(req.params.idUsuario);
+    res.status(200).json({ usuario });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: 'Error al dar de baja al usuario' });
   }
 };
+
+
 
 module.exports = {
   registrarUsuario,
