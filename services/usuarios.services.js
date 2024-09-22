@@ -1,6 +1,6 @@
-const crypto = require("crypto");
 const usuarioModel = require("../models/usuarios.schemas");
 const bcrypt = require("bcrypt")
+
 
 const traerTodosLosUsuarios = async() => {
   try {
@@ -64,6 +64,8 @@ const inicioSesion = async (body) => {
 
 const modificarUsuario = async (idUsuario, data) => {
   try {
+    const salt = await bcrypt.genSalt(10);
+    data.contrasenia = await bcrypt.hash(data.contrasenia, salt);
     const usuario = await usuarioModel.findByIdAndUpdate({_id: idUsuario}, data, {new: true});
     return usuario
   } catch (error) {
