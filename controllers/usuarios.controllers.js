@@ -1,4 +1,5 @@
 const usuariosServices = require("../services/usuarios.services");
+const { validationResult } = require('express-validator')
 
 //GET TODOS LOS USUARIOS
 const obtenerTodosLosUsuarios = async(req, res) => {
@@ -25,6 +26,11 @@ const obtenerUsuario = async (req, res) => {
 //POST
 const registrarUsuario = async(req, res) => {
   try {
+    const { errors } = validationResult(req)
+  
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg })
+    }
     const nuevoUsuario = await usuariosServices.añadirUnUsuario(req.body);
     if (nuevoUsuario.error) {
       return res.status(400).json({ msg: nuevoUsuario.msg });
@@ -39,6 +45,12 @@ const registrarUsuario = async(req, res) => {
 //Login
 const inciarSesionUsuario = async (req, res) => {
   try {
+    const { errors } = validationResult(req)
+  
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg })
+    }
+
     const result = await usuariosServices.inicioSesion(req.body);
 
     if (result.code === 400) {
@@ -59,6 +71,12 @@ const inciarSesionUsuario = async (req, res) => {
 //PUT EDITAR USUARIO
 const editarUsuario = async (req, res) => {
   try {
+    const { errors } = validationResult(req)
+  
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg })
+    }
+
     const id = req.params.idUsuario;
     const data = req.body;
 

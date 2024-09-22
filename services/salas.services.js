@@ -42,20 +42,6 @@ const borrarUnaSala = async(idSala) => {
   }
 };
 
-/*const cambiarDisponibilidad = (idSala) => {
-  try {
-      const posicionSala = salas.findIndex((sala) => sala.idSala === idSala);
-      if (posicionSala !== -1) {  // Asegúrate de que se encontró la sala
-          salas[posicionSala].Disponible = !salas[posicionSala].Disponible;
-          const mensaje = salas[posicionSala].Disponible ? 'Sala disponible' : 'Sala no disponible';
-          return mensaje;
-      } else {
-          return 'Sala no encontrada';
-      }
-  } catch (error) {
-      console.log(error);
-  }
-};*/
 const habilitarSala = async (idSala) =>{ 
   const sala = await SalasModel.findById(idSala);
 
@@ -79,7 +65,7 @@ const deshabilitarSala = async (idSala) =>{
     throw new Error('Sala no encontrada');
   }
 
-  sala.disponibilidad = true;
+  sala.disponibilidad = false;
   await sala.save();
 
   return {

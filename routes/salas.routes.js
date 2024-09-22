@@ -1,15 +1,16 @@
 const express = require("express");
 const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala } = require("../controllers/salas.controllers");
+const { agregarSalaValidaciones } = require("../middlewares/validaciones");
 const router = express.Router();
 
 //GET
 router.get("/:idSala?", obtenerUnaSalaPorIdOTodos);
 
 //POST
-router.post("/", crearUnaSala);
+router.post("/", agregarSalaValidaciones, crearUnaSala);
 
 //PUT
-router.put("/:idSala", editarUnaSala);
+router.put("/:idSala", agregarSalaValidaciones, editarUnaSala);
 
 //DELETE
 router.delete("/:idSala", borrarUnaSala);

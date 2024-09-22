@@ -1,4 +1,5 @@
 const salasServices = require("../services/salas.services");
+const { validationResult } = require('express-validator')
 
 
 // Controlador para obtener una sala por id o todas
@@ -25,6 +26,11 @@ const obtenerUnaSalaPorIdOTodos = async(req, res) => {
 // Controlador para crear una nueva sala
 const crearUnaSala = async(req, res) => {
   try {
+    const { errors } = validationResult(req)
+  
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg })
+    }
     const nuevaSala = await salasServices.crearSala(req.body);
     await nuevaSala.save()
     res.status(201).json(nuevaSala);
@@ -36,6 +42,12 @@ const crearUnaSala = async(req, res) => {
 // Controlador para editar una sala
 const editarUnaSala = async(req, res) => {
   try {
+    const { errors } = validationResult(req)
+  
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg })
+    }
+    
     const id = req.params.idSala;
     const data = req.body;
 
@@ -61,32 +73,6 @@ const borrarUnaSala = async (req, res) => {
     res.status(500).json({ error: "Error al borrar la sala" });
   }
 };
-
-//Controlador de borrado logico para cambiar la disponibilidad de la sala
-/*const disponibilidadDeUnaSala = (req, res) => {
-  try {
-    const id = req.params.idSala;
-
-    // Asegurarse de que el id no es undefined o null
-    if (!id) {
-      return res.status(400).json({ error: "ID de sala no proporcionado" });
-    }
-
-    const result = salasServices.cambiarDisponibilidad(id);
-
-    if (result) {
-      // En caso de éxito
-      return res.status(200).json({ message: result });
-    } else {
-      // Si cambiarDisponibilidad devuelve un resultado vacío o nulo
-      return res.status(404).json({ error: "Sala no encontrada" });
-    }
-
-  } catch (error) {
-    // Captura cualquier otro error
-    return res.status(500).json({ error: "Error interno del servidor" });
-  }
-};*/
 
 const habilitarSala = async(req, res) => {
   const result =  await salasServices.habilitarSala(req.params.idSala)
