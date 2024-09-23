@@ -1,27 +1,25 @@
 const salasServices = require("../services/salas.services");
 const { validationResult } = require('express-validator')
 
-
-// Controlador para obtener una sala por id o todas
-const obtenerUnaSalaPorIdOTodos = async(req, res) => {
+const obtenerUnaSalaPorIdOTodos = async (req, res) => {
   try {
     const id = req.params.idSala ? req.params.idSala : null;
+    const limit = req.query.limit || 10;
+    const to = req.query.to || 0;
+    const verDeshabilitadas = req.query.verDeshabilitadas === 'true'; // Parámetro para ver deshabilitadas
 
-    if (id !== null) {
+    if (id) {
       const sala = await salasServices.obtenerUnaSala(id);
-      if (sala) {
-        res.status(200).json(sala);
-      } else {
-        res.status(404).json({ mensaje: "Sala no encontrada" });
-      }
+      res.status(200).json(sala);
     } else {
-      const salas = await salasServices.obtenerTodasLasSalas();
+      const salas = await salasServices.obtenerTodasLasSalas(limit, to, verDeshabilitadas);
       res.status(200).json(salas);
     }
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener la sala" });
+    res.status(500).json(error);
   }
 };
+
 
 // Controlador para crear una nueva sala
 const crearUnaSala = async(req, res) => {

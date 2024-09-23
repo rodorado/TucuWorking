@@ -2,10 +2,29 @@ const SalasModel = require('../models/salas.schemas')
 
 
 //get
-const obtenerTodasLasSalas = async() => {
-  const traerSalas = await SalasModel.find()
-  return traerSalas;
+const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
+  try {
+    // Cambia la lógica según el parámetro verDeshabilitadas
+    const query = verDeshabilitadas ? {} : { disponibilidad: true }; // Si se quiere ver deshabilitadas, no se aplica el filtro
+
+    const [salas, cantidadTotal] = await Promise.all([
+      SalasModel.find(query).skip(to * limit).limit(limit),
+      SalasModel.countDocuments(verDeshabilitadas ? {} : { disponibilidad: true })
+    ]);
+
+    const paginacion = {
+      salas,
+      cantidadTotal
+    };
+
+    return paginacion;
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+
+
 const obtenerUnaSala = async(id) => {
   const sala = await SalasModel.findOne({_id: id})
   return sala;
