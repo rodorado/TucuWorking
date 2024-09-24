@@ -90,6 +90,18 @@ const deshabilitarUnaSala = async(req, res) => {
    }
 }
 
+const agregarImagenSalaPorId = async(req, res)=>{
+  try {
+    const resultado = await salasServices.agregarImagen(req.params.idSala, req.file)
+    if(resultado == 200){
+       return res.status(200).json({msg:'Se agrego la imagen correctamente'})
+
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 
 
@@ -100,6 +112,7 @@ module.exports = {
   editarUnaSala,
   borrarUnaSala,
   habilitarSala,
-  deshabilitarUnaSala
+  deshabilitarUnaSala,
+  agregarImagenSalaPorId
 };
 

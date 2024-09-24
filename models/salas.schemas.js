@@ -20,6 +20,10 @@ const SalasSchemas = new mongoose.Schema({
     disponibilidad: {
         type: Boolean,
         required: true
+    },
+    imagen:{
+        type: String,
+        default: ''
     }
 })
 

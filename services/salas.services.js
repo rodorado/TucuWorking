@@ -1,5 +1,6 @@
 const SalasModel = require('../models/salas.schemas')
-
+const cloudinary = require('../helpers/cloudinary');
+const SalasModels = require('../models/salas.schemas');
 
 //get
 const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
@@ -93,6 +94,16 @@ const deshabilitarSala = async (idSala) =>{
   };
 };
 
+const agregarImagen = async(idSala, file)=>{
+  const sala = await SalasModels.findOne({_id:idSala})
+  const resultado = await cloudinary.uploader.upload(file.path)
+  
+  sala.imagen = resultado.secure_url
+
+  await sala.save()
+  return 200
+};
+
 
 module.exports = {
   obtenerTodasLasSalas,
@@ -101,5 +112,6 @@ module.exports = {
   editarUnaSala,
   borrarUnaSala,
   habilitarSala,
-  deshabilitarSala
+  deshabilitarSala,
+  agregarImagen
 };
