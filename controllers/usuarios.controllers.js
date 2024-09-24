@@ -1,11 +1,17 @@
+const { token } = require("morgan");
 const usuariosServices = require("../services/usuarios.services");
 const { validationResult } = require('express-validator')
+
 
 //GET TODOS LOS USUARIOS
 const obtenerTodosLosUsuarios = async(req, res) => {
   try {
-    const users = await usuariosServices.traerTodosLosUsuarios();
+    const limit = req.query.limit || 10;
+    const to = req.query.to || 0;
+    const verBloqueados = req.query.verBloqueados === 'true';
+    const users = await usuariosServices.traerTodosLosUsuarios(limit, to, verBloqueados);
     res.status(200).json(users);
+
   } catch (error) {
     res.status(500).json({ error: "Error al obtener los usuarios" });
   }
@@ -24,23 +30,30 @@ const obtenerUsuario = async (req, res) => {
 };
 
 //POST
-const registrarUsuario = async(req, res) => {
+const registrarUsuario = async (req, res) => {
   try {
-    const { errors } = validationResult(req)
+    const { errors } = validationResult(req);
   
     if (errors.length) {
-      return res.status(422).json({ message: errors[0].msg })
+      return res.status(422).json({ message: errors[0].msg });
     }
+
     const nuevoUsuario = await usuariosServices.añadirUnUsuario(req.body);
+    
     if (nuevoUsuario.error) {
       return res.status(400).json({ msg: nuevoUsuario.msg });
+    } else if (nuevoUsuario === 409) {
+      return res.status(409).json({ msg: 'Error al crear: Rol incorrecto. Solo se puede ser usuario o admin' });
     }
-      res.status(200).json({ msg: nuevoUsuario.msg, usuario: nuevoUsuario.usuario });
+
+    return res.status(200).json({ msg: nuevoUsuario.msg, usuario: nuevoUsuario.usuario });
+    
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: "Error en el servidor", error });
+    return res.status(500).json({ msg: "Error en el servidor", error });
   }
 };
+
 
 //Login
 const inciarSesionUsuario = async (req, res) => {
@@ -56,7 +69,7 @@ const inciarSesionUsuario = async (req, res) => {
     if (result.code === 400) {
       res.status(400).json({ msg: result.msg });
     } else if (result.code === 200) {
-      res.status(200).json({ msg: result.msg });
+      res.status(200).json({ msg: result.msg, token: result.token });
     } else {
       res.status(500).json({ msg: result.msg });
     }
@@ -71,24 +84,31 @@ const inciarSesionUsuario = async (req, res) => {
 //PUT EDITAR USUARIO
 const editarUsuario = async (req, res) => {
   try {
-    const { errors } = validationResult(req)
+    const { errors } = validationResult(req);
   
     if (errors.length) {
-      return res.status(422).json({ message: errors[0].msg })
+      return res.status(422).json({ message: errors[0].msg });
     }
 
     const id = req.params.idUsuario;
     const data = req.body;
 
+    // Verificación de rol permitido
+    if (data.rol && data.rol !== 'usuario' && data.rol !== 'admin') {
+      return res.status(400).json({ msg: 'Error: Rol incorrecto. Solo se puede ser usuario o admin.' });
+    }
+
     const resultado = await usuariosServices.modificarUsuario(id, data);
     if (resultado.error) {
-      return res.status(400).json({ msg: 'Usuario modificado', resultado});
+      return res.status(400).json({ msg: resultado.msg });
     }
-    res.status(200).json(resultado.usuario);
+    res.status(200).json(resultado);
   } catch (error) {
     res.status(500).json({ msg: "Error al editar usuario", error });
   }
 };
+
+
 
 
 //DELETE fisico
