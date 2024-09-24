@@ -22,9 +22,15 @@ const agregarSalaValidaciones = [
     check('precio', 'Campo vacio').not().isEmpty()
 ]
 
+const categoriasValidaciones = [
+    check('nombre', 'Campo vacio').not().isEmpty(),
+    check('nombre', 'min: 5 caracteres y max: 10 ').isLength({min:5, max: 10}),
+]
+
 module.exports = {
     registroValidaciones,
     loginValidaciones,
     agregarSalaValidaciones,
+    categoriasValidaciones,
 }
 
