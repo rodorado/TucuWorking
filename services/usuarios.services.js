@@ -1,6 +1,7 @@
 const usuarioModel = require("../models/usuarios.schemas");
 const bcrypt = require("bcrypt")
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { registroUsuario } = require("../helpers/mensajes");
 
 const traerTodosLosUsuarios = async(limit, to, verBloqueados) => {
   try {
@@ -75,6 +76,8 @@ const inicioSesion = async (body) => {
     }
 
     const verificacionContrasenia = bcrypt.compareSync(body.contrasenia, usuarioExiste.contrasenia);
+
+    registroUsuario()
 
     if (verificacionContrasenia) {
       const payload = {
