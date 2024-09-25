@@ -30,7 +30,7 @@ const crearUnaCategoria = async (req, res) => {
     if (errors.length) {
       return res.status(422).json({ message: errors[0].msg });
     }
-    const nuevaCategoria = await categoriasServices.crearCategoria(req.body);
+    const nuevaCategoria = categoriasServices.crearCategoria(req.body);
     await nuevaCategoria.save();
     res.status(201).json(nuevaCategoria);
   } catch (error) {
