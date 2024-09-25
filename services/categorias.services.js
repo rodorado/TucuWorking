@@ -10,7 +10,7 @@ const obtenerTodasLasCategorias = async () => {
   }
 };
 
-const obtenerUnaCategoria = async () =>{
+const obtenerUnaCategoria = async (id) =>{
     try {
         const categoria = await CategoriasModels.findOne({_id: id})
         return categoria;

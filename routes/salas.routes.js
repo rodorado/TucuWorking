@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("../middlewares/multer");
 const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala } = require("../controllers/salas.controllers");
 const { agregarSalaValidaciones} = require("../middlewares/validaciones");
 const auth = require('../middlewares/auth')
@@ -9,6 +10,8 @@ const router = express.Router();
 router.get("/:idSala?", obtenerUnaSalaPorIdOTodos);
 
 //POST
+router.post("/", agregarSalaValidaciones, crearUnaSala);
+router.post('/agregarImagen/:idSala', multer.single('imagen'), agregarImagenSalaPorId) 
 router.post("/", agregarSalaValidaciones, auth('admin'), crearUnaSala);
 
 //PUT
