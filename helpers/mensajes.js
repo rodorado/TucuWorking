@@ -1,8 +1,8 @@
 const transporter = require(`../helpers/nodemailer`)
 
-const registroUsuario = async(nombre, apellido, emailUsuario) =>  {
+const registroUsuario = async(emailUsuario) =>  {
     // send mail with defined transport object
-    const info = await transporter.sendMail({
+     await transporter.sendMail({
       from: `Bienvenido a nuestra pagina!!!👻" <${process.env.GMAIL_USER}>`, // sender address
       to: emailUsuario, // list of receivers
       subject: "Bienvenido", // Subject line
