@@ -59,7 +59,9 @@ const añadirUnUsuario = async (body) => {
     body.contrasenia = bcrypt.hashSync(body.contrasenia, salt);
   
     const user = new usuarioModel(body); 
+    
     await user.save();  
+    registroUsuario(body.email)
     return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
   } catch (error) {
     return { error: true, msg: "Error al registrar usuario", detalle: error };
@@ -77,7 +79,6 @@ const inicioSesion = async (body) => {
 
     const verificacionContrasenia = bcrypt.compareSync(body.contrasenia, usuarioExiste.contrasenia);
 
-    registroUsuario()
 
     if (verificacionContrasenia) {
       const payload = {

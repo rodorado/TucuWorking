@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("../middlewares/multer");
-const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala } = require("../controllers/salas.controllers");
+const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala, agregarImagenSalaPorId } = require("../controllers/salas.controllers");
 const { agregarSalaValidaciones} = require("../middlewares/validaciones");
 const auth = require('../middlewares/auth')
 
