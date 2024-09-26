@@ -1,21 +1,19 @@
-const transporter = require(`../helpers/nodemailer`)
+const transporter = require(`../helpers/nodemailer`);
 
-const registroUsuario = async(nombre, apellido, emailUsuario) =>  {
-    // send mail with defined transport object
-    const info = await transporter.sendMail({
-      from: `Bienvenido a nuestra pagina!!!👻" <${process.env.GMAIL_USER}>`, // sender address
-      to: emailUsuario, // list of receivers
-      subject: "Bienvenido", // Subject line
-      html: `
+const registroUsuario = async (email) => {
+  const info = await transporter.sendMail({
+    from: `Bienvenido a nuestra pagina!!!👻" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: "Bienvenido",
+    html: `
+      <div>
+        <h2>Bienvenido</h2>
+      </div>
+    `,
+  });
+  return `Mensaje enviado: ${info.messageId}`;
+};
 
-        <div>
-          <h2>Bienvenido</h2>
-        </div>
-
-      `, // html body
-    });
-  }
-
-  module.exports = {
-    registroUsuario
-  }
+module.exports = {
+  registroUsuario,
+};

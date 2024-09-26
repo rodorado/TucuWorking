@@ -16,8 +16,6 @@ const loginValidaciones = [
 ]
 
 const agregarSalaValidaciones = [
-    check('nombre', 'Campo vacio').not().isEmpty(),
-    check('nombre', 'min: 5 caracteres y max: 10 ').isLength({min:5, max: 10}),
     check('tipo', 'Campo vacio').not().isEmpty(),
     check('capacidad', 'Campo vacio').not().isEmpty(),
     check('precio', 'Campo vacio').not().isEmpty()

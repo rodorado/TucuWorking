@@ -44,7 +44,7 @@ const añadirUnUsuario = async (body) => {
     const usuarioExiste = await usuarioModel.findOne({ email: body.email });
 
     if (usuarioExiste) {
-      return { error: true, msg: "Error al registrar usuario", detalle: error };
+      return { error: true, msg: "Error al registrar usuario, ya existe un usuario con ese email" };
     }
 
     if (!body.rol) {
@@ -52,19 +52,28 @@ const añadirUnUsuario = async (body) => {
     }
 
     if (body.rol !== 'usuario' && body.rol !== 'admin') {
-      return 409;
+      return 409; // Error si el rol no es válido
     }
 
+    // Encriptar la contraseña
     let salt = bcrypt.genSaltSync();
     body.contrasenia = bcrypt.hashSync(body.contrasenia, salt);
   
     const user = new usuarioModel(body); 
-    await user.save();  
+    await user.save();  // Guardar el nuevo usuario en la base de datos
+
+    // Debug: imprime el correo electrónico
+    console.log("Email del nuevo usuario:", user.email);
+
+    // Enviar correo de bienvenida
+    await registroUsuario(user.nombre, user.apellido, user.email); // Asegúrate de que estos campos existan en el objeto user
+
     return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
   } catch (error) {
     return { error: true, msg: "Error al registrar usuario", detalle: error };
   }
 };
+
 
 const inicioSesion = async (body) => {
   try {
