@@ -24,7 +24,7 @@ const obtenerUnaSalaPorIdOTodos = async (req, res) => {
   }
 };
 
-// Controlador para crear una nueva sala
+// Controlador para crear una nueva sala// nuevo implementado
 const crearUnaSala = async (req, res) => {
   try {
     const { errors } = validationResult(req);
