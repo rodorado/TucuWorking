@@ -49,11 +49,11 @@ const crearTipo = async (body) => {
 async function editarUnTipo(id, data) {
 
   if (data.categoriasDisponibles) {
-      data.categoriasDisponibles = data.categoriasDisponibles.map(categoria => mongoose.Types.ObjectId(categoria));
+      data.categoriasDisponibles = data.categoriasDisponibles.map(categoria =>new mongoose.Types.ObjectId(categoria));
   }
 
   try {
-      const tipoActualizado = await Tipo.findByIdAndUpdate(mongoose.Types.ObjectId(id), data, { new: true });
+      const tipoActualizado = await Tipo.findByIdAndUpdate( new mongoose.Types.ObjectId(id), data, { new: true });
       return tipoActualizado;
   } catch (error) {
       console.error(error);

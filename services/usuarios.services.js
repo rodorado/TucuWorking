@@ -63,7 +63,7 @@ const añadirUnUsuario = async (body) => {
     await user.save();  
     registroUsuario(body.email)
     return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
-  } catch (error) {
+  } catch (error) {console.log(error)
     return { error: true, msg: "Error al registrar usuario", detalle: error };
   }
 };
