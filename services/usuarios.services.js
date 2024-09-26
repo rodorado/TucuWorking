@@ -3,32 +3,37 @@ const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken');
 const { registroUsuario } = require("../helpers/mensajes");
 
-const traerTodosLosUsuarios = async(limit, to, verBloqueados) => {
+const traerTodosLosUsuarios = async (limit = 10, to = 0, verBloqueados = false) => {
   try {
-    /*const obtenerUsers = await usuarioModel.find()
-    return obtenerUsers*/
-    try {
-      const query = verBloqueados ? {} : { bloqueado: true }; // Si se quiere ver bloqueados, no se aplica el filtro
-  
-      const [usuarios, cantidadTotal] = await Promise.all([
-        usuarioModel.find(query).skip(to * limit).limit(limit),
-        usuarioModel.countDocuments(verBloqueados ? {} : { bloqueado: true })
-      ]);
-  
-      const paginacion = {
-        usuarios,
-        cantidadTotal
-      };
-      return paginacion;
+    const query = verBloqueados ? {} : { bloqueado: false }; // Filtra según si se deben ver bloqueados
 
-    } catch (error) {
-      console.log(error);
-    }
+    // Calcula correctamente la paginación: asegúrate de que limit y to tengan valores razonables
+    const skipValue = to >= 0 ? to * limit : 0;
 
+    const [usuarios, cantidadTotal] = await Promise.all([
+      usuarioModel
+        .find(query)
+        .sort({ createdAt: -1 }) // Ordena por los usuarios más recientes primero
+        .skip(skipValue) // Saltamos los usuarios según la página actual
+        .limit(limit), // Limitamos los resultados a la cantidad especificada
+      usuarioModel.countDocuments(query)
+    ]);
+
+    const paginacion = {
+      usuarios,
+      cantidadTotal,
+      paginaActual: to + 1,
+      paginasTotales: Math.ceil(cantidadTotal / limit),
+    };
+
+    return paginacion;
   } catch (error) {
     console.log(error);
+    throw new Error('Error al obtener los usuarios');
   }
 };
+
+
 
 const traerUnUsuario = async(id) => {
   try {
