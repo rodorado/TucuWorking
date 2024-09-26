@@ -16,9 +16,11 @@ const loginValidaciones = [
 ]
 
 const agregarSalaValidaciones = [
-    check('tipo', 'Campo vacio').not().isEmpty(),
+    check('tipoDeSala', 'Campo vacio').not().isEmpty(),
+    check('categoriaDeSala', 'Campo vacio').not().isEmpty(),
     check('capacidad', 'Campo vacio').not().isEmpty(),
-    check('precio', 'Campo vacio').not().isEmpty()
+    check('precio', 'Campo vacio').not().isEmpty(),
+    check('horariosDisponibles', 'Campo vacio').not().isEmpty(),
 ]
 
 const categoriasValidaciones = [

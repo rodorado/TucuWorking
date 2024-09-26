@@ -36,7 +36,7 @@ const obtenerUnaSala = async(id) => {
 //post
 const crearSala = async (body) => {
   try {
-    const { tipoDeSala, categoriaDeSala, horariosDisponibles } = body;
+    const { tipoDeSala, categoriaDeSala, capacidad, horariosDisponibles } = body;
 
     // Buscar los ObjectId de Tipo y Categoria basados en el nombre (en vez de recibir ObjectId)
     const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
@@ -47,7 +47,7 @@ const crearSala = async (body) => {
     }
 
     // Establecer capacidad y precio en función del tipo y la categoría
-    const capacidad = tipo.capacidad;
+    
 
     // Validar y ajustar horarios con dayjs si es necesario
     const horarios = horariosDisponibles.map((horario) => {

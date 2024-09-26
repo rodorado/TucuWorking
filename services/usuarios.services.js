@@ -60,7 +60,6 @@ const añadirUnUsuario = async (body) => {
     body.contrasenia = bcrypt.hashSync(body.contrasenia, salt);
   
     const user = new usuarioModel(body); 
-<<<<<<< HEAD
     await user.save();  // Guardar el nuevo usuario en la base de datos
 
     // Debug: imprime el correo electrónico
@@ -68,12 +67,9 @@ const añadirUnUsuario = async (body) => {
 
     // Enviar correo de bienvenida
     await registroUsuario(user.nombre, user.apellido, user.email); // Asegúrate de que estos campos existan en el objeto user
-
-=======
     
     await user.save();  
     registroUsuario(body.email)
->>>>>>> 6616b37bbd6e637e70edb5c15845b57b3d4b6945
     return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
   } catch (error) {console.log(error)
     return { error: true, msg: "Error al registrar usuario", detalle: error };
