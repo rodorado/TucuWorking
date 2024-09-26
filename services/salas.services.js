@@ -1,6 +1,8 @@
 const SalasModel = require('../models/salas.schemas')
 const cloudinary = require('../helpers/cloudinary');
-const SalasModels = require('../models/salas.schemas');
+const TipoModel = require('../models/tipos.schemas')
+const CategoriaModel = require('../models/categorias.schemas')
+const dayjs = require('dayjs');
 
 //get
 const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
@@ -32,14 +34,47 @@ const obtenerUnaSala = async(id) => {
 };
 
 //post
-const crearSala = (body) => {
+const crearSala = async (body) => {
   try {
-    const newSala = new SalasModel(body)
-    return newSala
+    const { tipoDeSala, categoriaDeSala, capacidad, horariosDisponibles } = body;
+
+    // Buscar los ObjectId de Tipo y Categoria basados en el nombre (en vez de recibir ObjectId)
+    const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
+    const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
+
+    if (!tipo || !categoria) {
+      throw new Error('Tipo o Categoría no encontrados en la base de datos');
+    }
+
+    // Establecer capacidad y precio en función del tipo y la categoría
+    
+
+    // Validar y ajustar horarios con dayjs si es necesario
+    const horarios = horariosDisponibles.map((horario) => {
+      return {
+        fecha: dayjs(horario.fecha).format('YYYY-MM-DD'),
+        horaInicio: dayjs(horario.horaInicio, 'HH:mm').format('HH:mm'),
+        horaFin: dayjs(horario.horaFin, 'HH:mm').format('HH:mm'),
+      };
+    });
+
+    // Crear nueva sala con los valores calculados y los ObjectId de Tipo y Categoria
+    const newSala = new SalasModel({
+      ...body,
+      tipoDeSala: tipo._id, // Guardar el ObjectId de tipo
+      categoriaDeSala: categoria._id, // Guardar el ObjectId de categoría
+      capacidad,
+      horariosDisponibles: horarios,
+    });
+
+    await newSala.save();
+    return newSala;
   } catch (error) {
     console.log(error);
+    throw new Error("Error al crear la sala");
   }
 };
+
 
 //put
 const editarUnaSala = async (idSala, data) => {
@@ -95,7 +130,7 @@ const deshabilitarSala = async (idSala) =>{
 };
 
 const agregarImagen = async(idSala, file)=>{
-  const sala = await SalasModels.findOne({_id:idSala})
+  const sala = await SalasModel.findOne({_id:idSala})
   const resultado = await cloudinary.uploader.upload(file.path)
   
   sala.imagen = resultado.secure_url
