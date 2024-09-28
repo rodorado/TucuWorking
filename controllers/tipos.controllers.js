@@ -41,27 +41,29 @@ const crearUnTipo = async (req, res) => {
 
 
 // Controlador para editar un tipo
-async function editarUnTipo(req, res) {
-  const { id } = req.params; 
 
+
+const editarUnTipo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() }); 
+    console.log('Errores de validación:', errors.array());
+    return res.status(400).json({ msg: errors.array() });
   }
 
-  const data = req.body; 
+  const idTipo = req.params.idTipo;
+  console.log('ID del tipo a editar:', idTipo);
 
   try {
-      const tipoActualizado = await tiposServices.editarUnTipo(id, data); 
-      if (!tipoActualizado) {
-          return res.status(404).json({ message: 'Tipo no encontrado' }); 
-      }
-      res.status(200).json(tipoActualizado); 
+    const result = await tiposServices.editarUnTipo(idTipo, req.body);
+    console.log('Resultado de la edición:', result);
+    res.status(200).json({ msg: result.msg });
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message }); 
+    console.error('Error al editar el tipo:', error.message);
+    res.status(500).json({ msg: error.message });
   }
-}
+};
+
+
 
 
 
