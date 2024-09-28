@@ -51,20 +51,7 @@ const crearTipo = async (body) => {
 
 
 // servicio para editar un tipo
-/*async function editarUnTipo(id, data) {
 
-  if (data.categoriasDisponibles) {
-      data.categoriasDisponibles = data.categoriasDisponibles.map(categoria =>new mongoose.Types.ObjectId(categoria));
-  }
-
-  try {
-      const tipoActualizado = await Tipo.findByIdAndUpdate( new mongoose.Types.ObjectId(id), data, { new: true });
-      return tipoActualizado;
-  } catch (error) {
-      console.error(error);
-      throw new Error('Error al actualizar el tipo');
-  }
-}*/
 const editarUnTipo = async (idTipo, body) => {
   const categoriasIds = await CategoriasModels.find({
     nombre: { $in: body.categoriasDisponibles } // Asumiendo que estás pasando nombres
