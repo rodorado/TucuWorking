@@ -15,7 +15,7 @@ router.post('/agregarImagen/:idSala', multer.single('imagen'), agregarImagenSala
 router.post("/", agregarSalaValidaciones, auth('admin'), crearUnaSala);
 
 //PUT
-router.put("/:idSala", auth('admin'), agregarSalaValidaciones, editarUnaSala);
+router.put("/:idSala", auth('admin'), editarUnaSala);
 
 //DELETE
 router.delete("/:idSala", auth('admin'), borrarUnaSala);

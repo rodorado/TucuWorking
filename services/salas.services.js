@@ -2,7 +2,6 @@ const SalasModel = require('../models/salas.schemas')
 const cloudinary = require('../helpers/cloudinary');
 const TipoModel = require('../models/tipos.schemas')
 const CategoriaModel = require('../models/categorias.schemas')
-const dayjs = require('dayjs');
 
 //get
 const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
@@ -26,8 +25,6 @@ const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
   }
 };
 
-
-
 const obtenerUnaSala = async(id) => {
   const sala = await SalasModel.findOne({_id: id})
   return sala;
@@ -38,7 +35,6 @@ const crearSala = async (body) => {
   try {
     const { tipoDeSala, categoriaDeSala, capacidad, horariosDisponibles } = body;
 
-    // Buscar los ObjectId de Tipo y Categoria basados en el nombre (en vez de recibir ObjectId)
     const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
     const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
 
@@ -46,44 +42,90 @@ const crearSala = async (body) => {
       throw new Error('Tipo o Categoría no encontrados en la base de datos');
     }
 
-    // Establecer capacidad y precio en función del tipo y la categoría
-    
-
-    // Validar y ajustar horarios con dayjs si es necesario
     const horarios = horariosDisponibles.map((horario) => {
+      // Verificar formato básico (esto es opcional, solo por seguridad)
+      if (!horario.fecha || !horario.horaInicio || !horario.horaFin) {
+        throw new Error('Fecha u hora en formato incorrecto');
+      }
       return {
-        fecha: dayjs(horario.fecha).format('YYYY-MM-DD'),
-        horaInicio: dayjs(horario.horaInicio, 'HH:mm').format('HH:mm'),
-        horaFin: dayjs(horario.horaFin, 'HH:mm').format('HH:mm'),
+        fecha: horario.fecha,
+        horaInicio: horario.horaInicio,
+        horaFin: horario.horaFin
       };
     });
 
-    // Crear nueva sala con los valores calculados y los ObjectId de Tipo y Categoria
     const newSala = new SalasModel({
       ...body,
-      tipoDeSala: tipo._id, // Guardar el ObjectId de tipo
-      categoriaDeSala: categoria._id, // Guardar el ObjectId de categoría
+      tipoDeSala: tipo._id,
+      categoriaDeSala: categoria._id,
       capacidad,
-      horariosDisponibles: horarios,
+      horariosDisponibles: horarios
     });
 
     await newSala.save();
     return newSala;
   } catch (error) {
-    console.log(error);
+    console.error("Error al crear la sala:", error);
     throw new Error("Error al crear la sala");
   }
 };
 
-
 //put
 const editarUnaSala = async (idSala, data) => {
   try {
-      const salaModificada = await SalasModel.findByIdAndUpdate({_id: idSala}, data, {new: true})
-      return salaModificada
+    const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
+
+    // Buscamos la sala por su ID
+    const sala = await SalasModel.findById(idSala);
+
+    if (!sala) {
+      throw new Error('Sala no encontrada');
+    }
+
+    // Si se proporciona un nuevo nombre de sala, lo actualizamos
+    if (nombreSala) {
+      sala.nombreSala = nombreSala;
+    }
+
+    // Si se proporcionan nuevos horarios, los actualizamos
+    if (horariosDisponibles && Array.isArray(horariosDisponibles)) {
+      const nuevosHorarios = horariosDisponibles.map((horario) => {
+        if (!horario.fecha || !horario.horaInicio || !horario.horaFin) {
+          throw new Error('Fecha u hora en formato incorrecto');
+        }
+        return {
+          fecha: horario.fecha,
+          horaInicio: horario.horaInicio,
+          horaFin: horario.horaFin
+        };
+      });
+      sala.horariosDisponibles = nuevosHorarios;
+    }
+
+    // Si se proporciona una nueva categoría de sala, validamos y actualizamos
+    if (categoriaDeSala) {
+      const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
+      if (!categoria) {
+        throw new Error('Categoría no encontrada');
+      }
+      sala.categoriaDeSala = categoria._id;
+    }
+
+    // Si se proporciona un nuevo tipo de sala, validamos y actualizamos
+    if (tipoDeSala) {
+      const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
+      if (!tipo) {
+        throw new Error('Tipo de sala no encontrado');
+      }
+      sala.tipoDeSala = tipo._id;
+    }
+
+    // Guardamos los cambios en la sala
+    await sala.save();
+    return sala;
   } catch (error) {
-    console.log(error);
-    return null;
+    console.error("Error al editar la sala:", error);
+    throw new Error("Error al editar la sala");
   }
 };
 

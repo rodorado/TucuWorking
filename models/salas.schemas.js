@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const SalasSchemas = new mongoose.Schema({
   nombre: {
     type: String,
