@@ -37,19 +37,21 @@ const tiposValidaciones = [
             throw new Error('Las categorías deben ser un arreglo de strings');
         }
 
-        // Buscar las categorías por nombre
+        // Buscar las categorías por nombre en la base de datos
         const categorias = await CategoriasModels.find({ nombre: { $in: categoriasNombres } });
 
-        // Comprobar que todas las categorías fueron encontradas
-        if (categorias.length !== categoriasNombres.length) {
-            throw new Error('Una o más categorías no son válidas');
+        // Comprobar si no se encontró ninguna categoría válida
+        if (categorias.length === 0) {
+            throw new Error('Ninguna categoría es válida');
         }
 
+        // Filtrar las categorías no válidas (opcional, dependiendo de cómo manejes las categorías válidas en tu modelo)
         const categoriasValidas = ['economy', 'confort', 'premium'];
         const categoriasNoValidas = categoriasNombres.filter(
             (nombre) => !categoriasValidas.includes(nombre)
         );
 
+        // Comprobar si hay categorías no válidas en comparación con las categorías permitidas
         if (categoriasNoValidas.length > 0) {
             throw new Error(`Las categorías deben ser una de las siguientes: ${categoriasValidas.join(', ')}`);
         }
@@ -57,6 +59,7 @@ const tiposValidaciones = [
         return true;
     }),
 ];
+
 
 
 module.exports = {

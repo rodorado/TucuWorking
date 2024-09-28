@@ -25,28 +25,33 @@ const obtenerUnTipo = async (id) => {
 
 const crearTipo = async (body) => {
   try {
+    // Buscar categorías en la base de datos que coincidan con las categorías proporcionadas
     const categoriasIds = await CategoriasModels.find({
       nombre: { $in: body.categoriasDisponibles }
-    }).select('_id'); 
+    }).select('_id');
 
-    if (categoriasIds.length !== body.categoriasDisponibles.length) {
-      throw new Error('Una o más categorías no son válidas');
+    // Si no se encuentra ninguna categoría, lanzar un error
+    if (categoriasIds.length === 0) {
+      throw new Error('Ninguna categoría es válida');
     }
 
+    // Crear el nuevo tipo con las categorías válidas encontradas
     const newTipo = new tipoModel({
       nombre: body.nombre,
-      categoriasDisponibles: categoriasIds 
+      categoriasDisponibles: categoriasIds  // Solo las categorías válidas se guardan
     });
 
+    // Guardar el nuevo tipo en la base de datos
     return await newTipo.save();
   } catch (error) {
-    console.log(error);
-    throw error; 
+    console.log(error);  // Mostrar el error en la consola para depuración
+    throw error;  // Volver a lanzar el error para que sea manejado por la función llamante
   }
 };
 
+
 // servicio para editar un tipo
-async function editarUnTipo(id, data) {
+/*async function editarUnTipo(id, data) {
 
   if (data.categoriasDisponibles) {
       data.categoriasDisponibles = data.categoriasDisponibles.map(categoria =>new mongoose.Types.ObjectId(categoria));
@@ -59,7 +64,24 @@ async function editarUnTipo(id, data) {
       console.error(error);
       throw new Error('Error al actualizar el tipo');
   }
-}
+}*/
+const editarUnTipo = async (idTipo, body) => {
+  const categoriasIds = await CategoriasModels.find({
+    nombre: { $in: body.categoriasDisponibles } // Asumiendo que estás pasando nombres
+  }).select('_id');
+
+  // Verifica que haya al menos una categoría válida
+  if (categoriasIds.length === 0) {
+    throw new Error('Ninguna categoría válida encontrada');
+  }
+
+  // Asegúrate de que body contenga los IDs
+  body.categoriasDisponibles = categoriasIds.map(cat => cat._id);
+
+  // Luego, actualiza el tipo
+  return await tipoModel.findByIdAndUpdate(idTipo, body, { new: true });
+};
+
 
 const borrarUnTipo = async (idTipo) => {
   try {
