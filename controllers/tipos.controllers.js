@@ -9,7 +9,7 @@ const obtenerUnTipoPorIdOTodos = async (req, res) => {
     if (id !== null) {
       const tipo = await tiposServices.obtenerUnTipo(id);
       if (tipo) {
-        res.status(200).json(tipo); 
+        res.status(200).json(tipo);
       } else {
         res.status(404).json({ mensaje: "Tipo de sala no encontrado" });
       }
@@ -30,44 +30,40 @@ const crearUnTipo = async (req, res) => {
     if (errors.length) {
       return res.status(422).json({ message: errors[0].msg });
     }
-    
-    const nuevoTipo = await tiposServices.crearTipo(req.body); 
+
+    const nuevoTipo = await tiposServices.crearTipo(req.body);
     res.status(201).json(nuevoTipo);
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ error: "Error al crear el tipo de sala", detalles: error.message }); 
+    console.log(error);
+    res
+      .status(500)
+      .json({
+        error: "Error al crear el tipo de sala",
+        detalles: error.message,
+      });
   }
 };
-
-
-// Controlador para editar un tipo
-
-
+// PUT
 const editarUnTipo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log('Errores de validación:', errors.array());
+    console.log("Errores de validación:", errors.array());
     return res.status(400).json({ msg: errors.array() });
   }
 
   const idTipo = req.params.idTipo;
-  console.log('ID del tipo a editar:', idTipo);
+  console.log("ID del tipo a editar:", idTipo);
 
   try {
     const result = await tiposServices.editarUnTipo(idTipo, req.body);
-    console.log('Resultado de la edición:', result);
+    console.log("Resultado de la edición:", result);
     res.status(200).json({ msg: result.msg });
   } catch (error) {
-    console.error('Error al editar el tipo:', error.message);
+    console.error("Error al editar el tipo:", error.message);
     res.status(500).json({ msg: error.message });
   }
 };
-
-
-
-
-
-//DELETE TIPOSa
+//DELETE TIPOS
 const borrarUnTipo = async (req, res) => {
   try {
     const id = req.params.idTipo;
@@ -82,5 +78,5 @@ module.exports = {
   obtenerUnTipoPorIdOTodos,
   crearUnTipo,
   editarUnTipo,
-  borrarUnTipo
+  borrarUnTipo,
 };
