@@ -38,8 +38,10 @@ const crearUnaSala = async (req, res) => {
 
 // Controlador para editar una sala
 const editarUnaSala = async (req, res) => {
+  const idSala = req.params.idSala;
+  console.log('ID del sala a editar:', idSala);
   try {
-    const salaEditada = await salasServices.editarUnaSala(req.params.id, req.body);
+    const salaEditada = await salasServices.editarUnaSala(idSala, req.body);
     res.status(200).json(salaEditada); // No necesitas la verificación adicional
   } catch (error) {
     console.log("Error en controlador:", error.message); // Mostrar el mensaje de error

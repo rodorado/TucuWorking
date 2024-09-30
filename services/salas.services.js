@@ -1,7 +1,10 @@
 const SalasModel = require('../models/salas.schemas')
 const cloudinary = require('../helpers/cloudinary');
 const TipoModel = require('../models/tipos.schemas')
-const CategoriaModel = require('../models/categorias.schemas')
+const mongoose = require('mongoose');
+
+const CategoriaModel = require('../models/categorias.schemas');
+const SalasModels = require('../models/salas.schemas');
 
 //get
 const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
@@ -71,16 +74,23 @@ const crearSala = async (body) => {
 };
 
 //put
+
+
 const editarUnaSala = async (idSala, data) => {
   try {
-    const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
-
-    // Buscamos la sala por su ID
-    const sala = await SalasModel.findById(idSala);
-
-    if (!sala) {
-      throw new Error('Sala no encontrada');
+    // Verificar si el ID es válido
+    if (!mongoose.Types.ObjectId.isValid(idSala)) {
+      return { error: true, msg: 'ID de sala no es válido' };
     }
+
+    // Buscar la sala por su ID
+    const sala = await SalasModel.findById(idSala);
+    if (!sala) {
+      return { error: true, msg: 'Sala no encontrada' };
+    }
+
+    // Actualizar los campos según data
+    const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
 
     // Si se proporciona un nuevo nombre de sala, lo actualizamos
     if (nombreSala) {
@@ -96,7 +106,7 @@ const editarUnaSala = async (idSala, data) => {
         return {
           fecha: horario.fecha,
           horaInicio: horario.horaInicio,
-          horaFin: horario.horaFin
+          horaFin: horario.horaFin,
         };
       });
       sala.horariosDisponibles = nuevosHorarios;
@@ -106,7 +116,7 @@ const editarUnaSala = async (idSala, data) => {
     if (categoriaDeSala) {
       const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
       if (!categoria) {
-        throw new Error('Categoría no encontrada');
+        return { error: true, msg: 'Categoría no encontrada' };
       }
       sala.categoriaDeSala = categoria._id;
     }
@@ -115,19 +125,28 @@ const editarUnaSala = async (idSala, data) => {
     if (tipoDeSala) {
       const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
       if (!tipo) {
-        throw new Error('Tipo de sala no encontrado');
+        return { error: true, msg: 'Tipo de sala no encontrado' };
       }
       sala.tipoDeSala = tipo._id;
     }
 
     // Guardamos los cambios en la sala
-    await sala.save();
-    return sala;
+    const salaActualizada = await sala.save();
+    return { error: false, sala: salaActualizada };
+
   } catch (error) {
-    console.error("Error al editar la sala:", error);
-    throw new Error("Error al editar la sala");
+    console.error("Error al editar la sala:", error.message);
+    return { error: true, msg: "Error al editar la sala", detalle: error.message };
   }
 };
+
+
+
+
+
+
+
+
 
 //delete
 const borrarUnaSala = async(idSala) => {
