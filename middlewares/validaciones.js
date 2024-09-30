@@ -60,6 +60,16 @@ const tiposValidaciones = [
     }),
 ];
 
+const reservasValidaciones = [
+    check('idUsuario', 'Campo vacio').not().isEmpty(),
+    check('tipoDeSala', 'Campo vacio').not().isEmpty(),
+    check('categoriaDeSala', 'Campo vacio').not().isEmpty(),
+    check('fecha', 'Campo vacio').not().isEmpty(),
+    check('horarioInicio', 'Campo vacio').not().isEmpty(),
+    check('horarioFin', 'Campo vacio').not().isEmpty(),
+    check('cantidadPersonas', 'Campo vacio').not().isEmpty(),
+]
+
 
 
 module.exports = {
@@ -67,6 +77,7 @@ module.exports = {
     loginValidaciones,
     agregarSalaValidaciones,
     categoriasValidaciones,
-    tiposValidaciones
+    tiposValidaciones,
+    reservasValidaciones
 }
 

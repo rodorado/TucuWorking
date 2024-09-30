@@ -10,9 +10,9 @@ const router = express.Router();
 router.get("/:idSala?", obtenerUnaSalaPorIdOTodos);
 
 //POST
-router.post("/", agregarSalaValidaciones, crearUnaSala);
-router.post('/agregarImagen/:idSala', multer.single('imagen'), agregarImagenSalaPorId) 
 router.post("/", agregarSalaValidaciones, auth('admin'), crearUnaSala);
+router.post('/agregarImagen/:idSala', multer.single('imagen'), agregarImagenSalaPorId) 
+
 
 //PUT
 router.put("/:idSala", auth('admin'), editarUnaSala);

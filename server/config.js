@@ -28,6 +28,7 @@ class Server {
     this.app.use("/api/usuarios", require('../routes/usuarios.routes'))
     this.app.use("/api/categorias", require('../routes/categorias.routes'))
     this.app.use("/api/tipos", require('../routes/tipos.routes'))
+    this.app.use("/api/reservas", require('../routes/reservas.routes'))
   }
 
   listen() {
