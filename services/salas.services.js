@@ -89,13 +89,7 @@ const editarUnaSala = async (idSala, data) => {
       return { error: true, msg: 'Sala no encontrada' };
     }
 
-    // Actualizar los campos según data
     const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
-
-    // Si se proporciona un nuevo nombre de sala, lo actualizamos
-    if (nombreSala) {
-      sala.nombreSala = nombreSala;
-    }
 
     // Si se proporcionan nuevos horarios, los actualizamos
     if (horariosDisponibles && Array.isArray(horariosDisponibles)) {
@@ -109,36 +103,40 @@ const editarUnaSala = async (idSala, data) => {
           horaFin: horario.horaFin,
         };
       });
-      sala.horariosDisponibles = nuevosHorarios;
     }
 
-    // Si se proporciona una nueva categoría de sala, validamos y actualizamos
+    // Si se proporciona una nueva categoría de sala, validamos y actualizamos con ObjectId
     if (categoriaDeSala) {
       const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
       if (!categoria) {
         return { error: true, msg: 'Categoría no encontrada' };
       }
-      sala.categoriaDeSala = categoria._id;
+
+      // Asignar el ObjectId de la categoría
+      data.categoriaDeSala = categoria._id;
     }
 
-    // Si se proporciona un nuevo tipo de sala, validamos y actualizamos
+    // Si se proporciona un nuevo tipo de sala, validamos y actualizamos con ObjectId
     if (tipoDeSala) {
       const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
       if (!tipo) {
         return { error: true, msg: 'Tipo de sala no encontrado' };
       }
-      sala.tipoDeSala = tipo._id;
+
+      // Asignar el ObjectId del tipo de sala
+      data.tipoDeSala = tipo._id;
     }
 
     // Guardamos los cambios en la sala
-    const salaActualizada = await sala.save();
-    return { error: false, sala: salaActualizada };
+    return await SalasModel.findByIdAndUpdate(idSala, data, { new: true });
 
   } catch (error) {
     console.error("Error al editar la sala:", error.message);
     return { error: true, msg: "Error al editar la sala", detalle: error.message };
   }
 };
+
+
 
 
 
