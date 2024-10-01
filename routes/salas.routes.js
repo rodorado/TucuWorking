@@ -1,18 +1,26 @@
 const express = require("express");
-const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, disponibilidadDeUnaSala } = require("../controllers/salas.controllers");
+const multer = require("../middlewares/multer");
+const { obtenerUnaSalaPorIdOTodos, crearUnaSala, editarUnaSala, borrarUnaSala, habilitarSala,deshabilitarUnaSala, agregarImagenSalaPorId } = require("../controllers/salas.controllers");
+const { agregarSalaValidaciones} = require("../middlewares/validaciones");
+const auth = require('../middlewares/auth')
+
 const router = express.Router();
 
 //GET
 router.get("/:idSala?", obtenerUnaSalaPorIdOTodos);
 
 //POST
-router.post("/", crearUnaSala);
+router.post("/", agregarSalaValidaciones, auth('admin'), crearUnaSala);
+router.post('/agregarImagen/:idSala', multer.single('imagen'), agregarImagenSalaPorId) 
+
 
 //PUT
-router.put("/:idSala", editarUnaSala);
+router.put("/:idSala", auth('admin'), editarUnaSala);
 
 //DELETE
-router.delete("/:idSala", borrarUnaSala);
-router.put("/:idSala", disponibilidadDeUnaSala)
+router.delete("/:idSala", auth('admin'), borrarUnaSala);
+
+router.put('/habilitar/:idSala', auth('admin'), habilitarSala)
+router.put('/deshabilitar/:idSala', auth('admin'), deshabilitarUnaSala)
 
 module.exports = router;

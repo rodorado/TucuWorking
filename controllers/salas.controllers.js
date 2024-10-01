@@ -1,83 +1,104 @@
 const salasServices = require("../services/salas.services");
+const { validationResult } = require("express-validator");
 
-
-// Controlador para obtener una sala por id o todas
-const obtenerUnaSalaPorIdOTodos = (req, res) => {
+const obtenerUnaSalaPorIdOTodos = async (req, res) => {
   try {
-    const id = req.params.idSala ? Number(req.params.idSala) : null;
+    const id = req.params.idSala ? req.params.idSala : null;
+    const limit = req.query.limit || 10;
+    const to = req.query.to || 0;
+    const verDeshabilitadas = req.query.verDeshabilitadas === "true"; // Parámetro para ver deshabilitadas
 
-    if (id !== null) {
-      const sala = salasServices.obtenerUnaSala(id);
-      if (sala) {
-        res.status(200).json(sala);
-      } else {
-        res.status(404).json({ mensaje: "Sala no encontrada" });
-      }
+    if (id) {
+      const sala = await salasServices.obtenerUnaSala(id);
+      res.status(200).json(sala);
     } else {
-      const salas = salasServices.obtenerTodasLasSalas();
+      const salas = await salasServices.obtenerTodasLasSalas(
+        limit,
+        to,
+        verDeshabilitadas
+      );
       res.status(200).json(salas);
     }
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener la sala" });
+    res.status(500).json(error);
   }
 };
 
-// Controlador para crear una nueva sala
-const crearUnaSala = (req, res) => {
+// Controlador para crear una nueva sala// nuevo implementado
+const crearUnaSala = async (req, res) => {
   try {
-    const nuevaSala = salasServices.crearSala(req.body);
-    res.status(201).json(nuevaSala);
+    const newSala = await salasServices.crearSala(req.body);
+    res.status(201).json(newSala);
   } catch (error) {
-    res.status(500).json({ error: "Error al crear la sala" });
+    console.log(error);
+    res.status(500).json({ error: 'Error al crear la sala' });
   }
 };
+
 
 // Controlador para editar una sala
-const editarUnaSala = (req, res) => {
+const editarUnaSala = async (req, res) => {
   try {
-    const id = Number(req.params.idSala);
-    const data = req.body;
-
-    const salaEditada = salasServices.editarUnaSala(id, data);
-
-    if (salaEditada) {
-      res.status(200).json(salaEditada);
-    } else {
-      res.status(404).json({ mensaje: "Sala no encontrada" });
-    }
+    const salaEditada = await salasServices.editarUnaSala(req.params.id, req.body);
+    res.status(200).json(salaEditada); // No necesitas la verificación adicional
   } catch (error) {
-    res.status(500).json({ error: "Sala al editar la sala" });
+    console.log("Error en controlador:", error.message); // Mostrar el mensaje de error
+    res.status(500).json({ error: error.message }); // Proporcionar el mensaje de error en la respuesta
   }
 };
 
+
+
+
 // Controlador para borrar una sala
-const borrarUnaSala = (req, res) => {
+const borrarUnaSala = async (req, res) => {
   try {
-    const id = Number(req.params.idSala);
-    const resultado = salasServices.borrarUnaSala(id);
+    const id = req.params.idSala;
+    const resultado = await salasServices.borrarUnaSala(id);
     res.status(200).json({ msg: "Sala borrada con exito", resultado });
   } catch (error) {
     res.status(500).json({ error: "Error al borrar la sala" });
   }
 };
 
-//Controlador de borrado logico para cambiar la disponibilidad de la sala
-const disponibilidadDeUnaSala = (req, res) =>{
-  try {
-    const id = req.params.idSala;
-    const result = salasServices.cambiarDisponibilidad(id)
-    res.status(200).json(result)
-  } catch (error) {
-    res.status(500).json({error: "no se encontró la sala"})
+const habilitarSala = async (req, res) => {
+  const result = await salasServices.habilitarSala(req.params.idSala);
+  if (result.statusCode === 200) {
+    res.status(200).json({ msg: result.msg });
+  } else {
+    res.status(500).json({ msg: result.msg });
   }
-}
+};
 
+const deshabilitarUnaSala = async (req, res) => {
+  const result = await salasServices.deshabilitarSala(req.params.idSala);
+  if (result.statusCode === 200) {
+    res.status(200).json({ msg: result.msg });
+  } else {
+    res.status(500).json({ msg: result.msg });
+  }
+};
+
+const agregarImagenSalaPorId = async (req, res) => {
+  try {
+    const resultado = await salasServices.agregarImagen(
+      req.params.idSala,
+      req.file
+    );
+    if (resultado == 200) {
+      return res.status(200).json({ msg: "Se agrego la imagen correctamente" });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = {
   obtenerUnaSalaPorIdOTodos,
   crearUnaSala,
   editarUnaSala,
   borrarUnaSala,
-  disponibilidadDeUnaSala
+  habilitarSala,
+  deshabilitarUnaSala,
+  agregarImagenSalaPorId,
 };
-

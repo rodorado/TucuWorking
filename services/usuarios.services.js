@@ -1,127 +1,172 @@
-const crypto = require("crypto");
+const usuarioModel = require("../models/usuarios.schemas");
+const bcrypt = require("bcrypt")
+const jwt = require('jsonwebtoken');
+const { registroUsuario } = require("../helpers/mensajes");
 
-const usuarios = [
-  {
-    id: 1,
-    userUsuario: "rodorado",
-    nombreApellido: "Rocio Dorado",
-    emailUsuario: "rocio_dorado12@hotmail.com",
-    contrasenia: "458965327",
-    baja: false,
-  },
-];
-
-const traerTodosLosUsuarios = () => {
+const traerTodosLosUsuarios = async (limit = 10, to = 0, verBloqueados = false) => {
   try {
-    return usuarios;
+    const query = verBloqueados ? {} : { bloqueado: false }; // Filtra según si se deben ver bloqueados
+
+    // Calcula correctamente la paginación: asegúrate de que limit y to tengan valores razonables
+    const skipValue = to >= 0 ? to * limit : 0;
+
+    const [usuarios, cantidadTotal] = await Promise.all([
+      usuarioModel
+        .find(query)
+        .sort({ createdAt: -1 }) // Ordena por los usuarios más recientes primero
+        .skip(skipValue) // Saltamos los usuarios según la página actual
+        .limit(limit), // Limitamos los resultados a la cantidad especificada
+      usuarioModel.countDocuments(query)
+    ]);
+
+    const paginacion = {
+      usuarios,
+      cantidadTotal,
+      paginaActual: to + 1,
+      paginasTotales: Math.ceil(cantidadTotal / limit),
+    };
+
+    return paginacion;
   } catch (error) {
     console.log(error);
+    throw new Error('Error al obtener los usuarios');
   }
 };
 
-const traerUnUsuario = (id) => {
+
+
+const traerUnUsuario = async(id) => {
   try {
-    const usuario = usuarios.find((user) => user.id === id);
+    const usuario = await usuarioModel.findOne({_id: id})
     return usuario;
   } catch (error) {
     console.log(error);
   }
 };
-const añadirUnUsuario = (body) => {
-  try {
-    const emailExiste = usuarios.find(
-      (usuario) => usuario.emailUsuario === body.emailUsuario
-    );
-    const usuarioExiste = usuarios.find(
-      (usuario) => usuario.userUsuario === body.userUsuario
-    );
 
-    if (emailExiste) {
-      return { error: true, msg: "Email no disponible" };
-    }
+const añadirUnUsuario = async (body) => {
+  try {
+    const usuarioExiste = await usuarioModel.findOne({ email: body.email });
 
     if (usuarioExiste) {
-      return { error: true, msg: "Usuario no disponible" };
+      return { error: true, msg: "Error al registrar usuario", detalle: error };
     }
-    const id = crypto.randomUUID();
-    const nuevoUsuario = { id, baja: false, ...body };
-    usuarios.push(nuevoUsuario);
-    return {
-      error: false,
-      msg: "Usuario registrado con éxito",
-      usuario: nuevoUsuario,
-    };
-  } catch (error) {
+
+    if (!body.rol) {
+      body.rol = 'usuario';
+    }
+
+    if (body.rol !== 'usuario' && body.rol !== 'admin') {
+      return 409;
+    }
+
+    let salt = bcrypt.genSaltSync();
+    body.contrasenia = bcrypt.hashSync(body.contrasenia, salt);
+  
+    const user = new usuarioModel(body); 
+    
+    await user.save();  
+    registroUsuario(body.email)
+    return { error: false, msg: "Usuario registrado con éxito", usuario: user }; 
+  } catch (error) {console.log(error)
     return { error: true, msg: "Error al registrar usuario", detalle: error };
   }
 };
 
-const modificarUsuario = (idUsuario, data) => {
+
+const inicioSesion = async (body) => {
   try {
-    const posicionUsuario = usuarios.findIndex(
-      (usuario) => usuario.id === idUsuario
-    );
+    
+    const usuarioExiste = await usuarioModel.findOne({ email: body.email });
 
-    // Si el usuario no existe
-    if (posicionUsuario === -1) {
-      return { error: true, msg: "Usuario no encontrado" };
+    if (!usuarioExiste) {
+      return { code: 400, msg: "Email incorrecto" };
     }
 
-    // Validar si el email ya existe en otro usuario
-    const emailExiste = usuarios.some(
-      (usuario) =>
-        usuario.emailUsuario === data.emailUsuario && usuario.id !== idUsuario
-    );
+    const verificacionContrasenia = bcrypt.compareSync(body.contrasenia, usuarioExiste.contrasenia);
 
-    if (emailExiste) {
-      return { error: true, msg: "Email ya está en uso" };
+
+    if (verificacionContrasenia) {
+      const payload = {
+        _id: usuarioExiste._id,
+        rol: usuarioExiste.rol,
+        bloqueado: usuarioExiste.bloqueado,
+      }
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+
+      return { code: 200, token, msg: "Inicio de sesión exitoso", usuario: usuarioExiste };
+    } else {
+      return { code: 400, msg: "Contraseña incorrecta" };
+    }
+  } catch (error) {
+    console.log(error);
+    return { code: 500, msg: "Error en el servidor", error: error.message };
+  }
+};
+
+
+const modificarUsuario = async (idUsuario, data) => {
+  try {
+    const usuario = await usuarioModel.findById(idUsuario);
+
+    if (!usuario) {
+      return { error: true, msg: 'Usuario no encontrado' };
     }
 
-    // Bloquear la edición de 'id' y 'baja'
-    const camposEditables = { ...data };
-    delete camposEditables.id;
-    delete camposEditables.baja;
+    // Verifica si el rol es "usuario" y no permite cambiar a "admin"
+    if (usuario.rol === 'usuario' && data.rol === 'admin') {
+      return { error: true, msg: "Un usuario no puede cambiar su rol a admin." };
+    }
+
+    // Eliminar el campo "bloqueado" si existe en la data
+    delete data.bloqueado;
+
+    // Encriptar la nueva contraseña si está presente
+    if (data.contrasenia) {
+      const salt = await bcrypt.genSalt(10);
+      data.contrasenia = await bcrypt.hash(data.contrasenia, salt);
+    }
 
     // Actualizar el usuario
-    const usuarioEditado = {
-      ...usuarios[posicionUsuario],
-      ...camposEditables,
-    };
-
-    usuarios[posicionUsuario] = usuarioEditado;
-
-    return { error: false, usuario: usuarioEditado };
+    const usuarioActualizado = await usuarioModel.findByIdAndUpdate(idUsuario, data, { new: true });
+    return { error: false, usuario: usuarioActualizado };
   } catch (error) {
     console.log(error);
+    return { error: true, msg: "Error al actualizar usuario", detalle: error.message };
   }
 };
 
-const borradoFisicoUsuario = (idUsuario) => {
+
+
+
+const borradoFisicoUsuario = async(idUsuario) => {
   try {
-    const posicionUsuario = usuarios.findIndex(
-      (usuario) => usuario.idUsuario === idUsuario
-    );
-    usuarios.splice(posicionUsuario, 1);
-    return 200;
+    await usuarioModel.findByIdAndDelete({_id: idUsuario})
+    return 200
   } catch (error) {
     console.log(error);
   }
 };
 
-const borradoLogicoUsuario = (idUsuario) => {
+const borradoLogicoUsuario = async (idUsuario) => {
   try {
-    const posicionUsuario = usuarios.findIndex(
-      (usuario) => usuario.id === idUsuario
-    );
-    usuarios[posicionUsuario].baja = !usuarios[posicionUsuario].baja;
-    const mensaje = usuarios[posicionUsuario].baja
-      ? "Usuario dado de baja"
-      : "Usuario dado de alta";
-    return mensaje;
+    const usuario = await usuarioModel.findOne({ _id: idUsuario });
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    usuario.bloqueado = !usuario.bloqueado; // Cambia el estado de bloqueado
+    const actualizarUsuario = await usuario.save(); // Guarda el usuario modificado
+
+    return actualizarUsuario;
   } catch (error) {
     console.log(error);
+    throw new Error('Error al realizar el borrado lógico');
   }
 };
+
 
 module.exports = {
   traerTodosLosUsuarios,
@@ -130,4 +175,5 @@ module.exports = {
   borradoFisicoUsuario,
   borradoLogicoUsuario,
   modificarUsuario,
+  inicioSesion,
 };
