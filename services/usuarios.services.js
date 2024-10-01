@@ -1,7 +1,8 @@
 const usuarioModel = require("../models/usuarios.schemas");
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken');
-const { registroUsuario } = require("../helpers/mensajes");
+const crypto = require('crypto');
+const { registroUsuario, msgRecuContrasenia } = require("../helpers/mensajes");
 
 const traerTodosLosUsuarios = async (limit = 10, to = 0, verBloqueados = false) => {
   try {
@@ -168,6 +169,62 @@ const borradoLogicoUsuario = async (idUsuario) => {
 };
 
 
+// Ruta para solicitar recuperación de contraseña
+const solicitarRecuperacionContrasenia = async (email) => {
+  try {
+    console.log("email recibido: ", email)
+    const usuario = await usuarioModel.findOne({ email });
+
+    if (!usuario) {
+      return { error: true, msg: 'El email no está registrado' };
+    }
+
+    // Generar un token único para la recuperación
+    const token = crypto.randomBytes(32).toString('hex');
+
+    // Establecer la expiración del token (por ejemplo, 1 hora)
+    usuario.tokenRecuperacion = token;
+    usuario.expiracionToken = Date.now() + 3600000; // 1 hora desde ahora
+    await usuario.save();
+    msgRecuContrasenia(email, token);
+    return { error: false, msg: 'Correo de recuperación enviado' };
+  } catch (error) {
+    console.log(error);
+    return { error: true, msg: 'Error al enviar correo de recuperación' };
+  }
+};
+const restablecerContrasenia = async (token, nuevaContrasenia) => {
+  try {
+    // Buscar el usuario por el token y verificar que no haya expirado
+    const usuario = await usuarioModel.findOne({
+      tokenRecuperacion: token,
+      expiracionToken: { $gt: Date.now() } // Verifica que el token no haya expirado
+    });
+
+    if (!usuario) {
+      return { error: true, msg: 'Token inválido o expirado' };
+    }
+
+    // Encriptar la nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    usuario.contrasenia = await bcrypt.hash(nuevaContrasenia, salt);
+
+    // Eliminar el token y la expiración
+    usuario.tokenRecuperacion = undefined;
+    usuario.expiracionToken = undefined;
+
+    await usuario.save();
+
+    return { error: false, msg: 'Contraseña restablecida correctamente' };
+  } catch (error) {
+    console.log(error);
+    return { error: true, msg: 'Error al restablecer la contraseña' };
+  }
+};
+
+
+
+
 module.exports = {
   traerTodosLosUsuarios,
   traerUnUsuario,
@@ -176,4 +233,6 @@ module.exports = {
   borradoLogicoUsuario,
   modificarUsuario,
   inicioSesion,
+  solicitarRecuperacionContrasenia,
+  restablecerContrasenia
 };

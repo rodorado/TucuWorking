@@ -133,6 +133,24 @@ const bajaLogicaUsuario = async(req, res) => {
   }
 };
 
+//Recuperacion Contraseña
+
+//solicitar
+const solicitarRecuContrasenia = async (req, res) => {
+  const { email } = req.body; // Extrae el email del cuerpo de la solicitud
+  const resultado = await usuariosServices.solicitarRecuperacionContrasenia(email); // Pasa el email al servicio
+  res.status(resultado.error ? 400 : 200).send(resultado); // Envía la respuesta con el estado adecuado
+};
+
+
+//restablecer
+const restablecerContrasenia = async (req, res) => {
+  const { token } = req.params;
+  const { nuevaContrasenia } = req.body;
+  const resultado = await usuariosServices.restablecerContrasenia(token, nuevaContrasenia);
+  res.status(resultado.error ? 400 : 200).send(resultado);
+};
+
 
 
 module.exports = {
@@ -143,4 +161,6 @@ module.exports = {
   bajaLogicaUsuario,
   editarUsuario,
   inciarSesionUsuario,
+  solicitarRecuContrasenia, 
+  restablecerContrasenia
 };

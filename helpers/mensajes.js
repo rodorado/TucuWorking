@@ -16,6 +16,18 @@ const registroUsuario = async(emailUsuario) =>  {
     });
   }
 
+  const msgRecuContrasenia= async(email, token) => {
+    await transporter.sendMail({
+      from: process.env.GMAIL_USER,
+    to: email,
+    subject: 'Recuperación de contraseña',
+    text: `Para restablecer tu contraseña,
+     haz clic en el siguiente enlace: ${process.env.FRONTEND_URL}/reset-password/${token}`
+    })
+    
+  };
+
   module.exports = {
-    registroUsuario
+    registroUsuario,
+    msgRecuContrasenia
   }
