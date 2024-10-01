@@ -1,5 +1,5 @@
 const express = require("express")
-const { registrarUsuario, obtenerTodosLosUsuarios, obtenerUsuario, bajaFisicaUsuario, bajaLogicaUsuario, editarUsuario, inciarSesionUsuario } = require("../controllers/usuarios.controllers")
+const { registrarUsuario, obtenerTodosLosUsuarios, obtenerUsuario, bajaFisicaUsuario, bajaLogicaUsuario, editarUsuario, inciarSesionUsuario, solicitarRecuContrasenia, restablecerContrasenia } = require("../controllers/usuarios.controllers")
 const { registroValidaciones, loginValidaciones } = require("../middlewares/validaciones")
 const auth = require("../middlewares/auth")
 const router = express.Router()
@@ -21,6 +21,11 @@ router.put("/:idUsuario/borradoLogico", bajaLogicaUsuario)
 
 //Baja Fisica
 router.delete("/:idUsuario", auth('admin'), bajaFisicaUsuario)
+
+//Restablecer contraseña
+
+router.post("/recuperar-contrasenia", solicitarRecuContrasenia)
+router.post("/restablecer-contrasenia/:token", restablecerContrasenia)
 
 
 

@@ -1,4 +1,4 @@
-const { Schema, Model, model } = require("mongoose");
+const { Schema, model } = require('mongoose');
 
 const usuarioSchema = new Schema({
   nombreApellido: {
@@ -15,6 +15,12 @@ const usuarioSchema = new Schema({
     required: true,
     trim: true,
   },
+  tokenRecuperacion: {
+    type: String, // Token de recuperación
+  },
+  expiracionToken: {
+    type: Date, // Fecha de expiración del token
+  },
   rol: {
     type: String,
     default: "usuario",
@@ -26,6 +32,7 @@ const usuarioSchema = new Schema({
   },
 });
 
+// Método para ocultar ciertos campos cuando se convierta el objeto a JSON
 usuarioSchema.methods.toJSON = function () {
   const { contrasenia, __v, ...usuario } = this.toObject();
   return usuario;
@@ -33,3 +40,4 @@ usuarioSchema.methods.toJSON = function () {
 
 const usuarioModel = model("usuario", usuarioSchema);
 module.exports = usuarioModel;
+
