@@ -1,7 +1,10 @@
 const SalasModel = require('../models/salas.schemas')
 const cloudinary = require('../helpers/cloudinary');
 const TipoModel = require('../models/tipos.schemas')
-const CategoriaModel = require('../models/categorias.schemas')
+const mongoose = require('mongoose');
+
+const CategoriaModel = require('../models/categorias.schemas');
+const SalasModels = require('../models/salas.schemas');
 
 //get
 const obtenerTodasLasSalas = async (limit, to, verDeshabilitadas) => {
@@ -71,21 +74,22 @@ const crearSala = async (body) => {
 };
 
 //put
+
+
 const editarUnaSala = async (idSala, data) => {
   try {
-    const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
+    // Verificar si el ID es válido
+    if (!mongoose.Types.ObjectId.isValid(idSala)) {
+      return { error: true, msg: 'ID de sala no es válido' };
+    }
 
-    // Buscamos la sala por su ID
+    // Buscar la sala por su ID
     const sala = await SalasModel.findById(idSala);
-
     if (!sala) {
-      throw new Error('Sala no encontrada');
+      return { error: true, msg: 'Sala no encontrada' };
     }
 
-    // Si se proporciona un nuevo nombre de sala, lo actualizamos
-    if (nombreSala) {
-      sala.nombreSala = nombreSala;
-    }
+    const { nombreSala, horariosDisponibles, categoriaDeSala, tipoDeSala } = data;
 
     // Si se proporcionan nuevos horarios, los actualizamos
     if (horariosDisponibles && Array.isArray(horariosDisponibles)) {
@@ -96,38 +100,51 @@ const editarUnaSala = async (idSala, data) => {
         return {
           fecha: horario.fecha,
           horaInicio: horario.horaInicio,
-          horaFin: horario.horaFin
+          horaFin: horario.horaFin,
         };
       });
-      sala.horariosDisponibles = nuevosHorarios;
     }
 
-    // Si se proporciona una nueva categoría de sala, validamos y actualizamos
+    // Si se proporciona una nueva categoría de sala, validamos y actualizamos con ObjectId
     if (categoriaDeSala) {
       const categoria = await CategoriaModel.findOne({ nombre: categoriaDeSala });
       if (!categoria) {
-        throw new Error('Categoría no encontrada');
+        return { error: true, msg: 'Categoría no encontrada' };
       }
-      sala.categoriaDeSala = categoria._id;
+
+      // Asignar el ObjectId de la categoría
+      data.categoriaDeSala = categoria._id;
     }
 
-    // Si se proporciona un nuevo tipo de sala, validamos y actualizamos
+    // Si se proporciona un nuevo tipo de sala, validamos y actualizamos con ObjectId
     if (tipoDeSala) {
       const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
       if (!tipo) {
-        throw new Error('Tipo de sala no encontrado');
+        return { error: true, msg: 'Tipo de sala no encontrado' };
       }
-      sala.tipoDeSala = tipo._id;
+
+      // Asignar el ObjectId del tipo de sala
+      data.tipoDeSala = tipo._id;
     }
 
     // Guardamos los cambios en la sala
-    await sala.save();
-    return sala;
+    return await SalasModel.findByIdAndUpdate(idSala, data, { new: true });
+
   } catch (error) {
-    console.error("Error al editar la sala:", error);
-    throw new Error("Error al editar la sala");
+    console.error("Error al editar la sala:", error.message);
+    return { error: true, msg: "Error al editar la sala", detalle: error.message };
   }
 };
+
+
+
+
+
+
+
+
+
+
 
 //delete
 const borrarUnaSala = async(idSala) => {
