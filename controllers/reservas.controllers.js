@@ -27,42 +27,46 @@ const obtenerReserva = async (req, res) => {
 };
 //POST
 const crearUnaReserva = async (req, res) => {
-    const { errors } = validationResult(req);
+  const { errors } = validationResult(req);
 
-    if (errors.length) {
-      return res.status(422).json({ message: errors[0].msg });
-    }
-    const {
+  if (errors.length) {
+    return res.status(422).json({ message: errors[0].msg });
+  }
+
+  const {
+    idUsuario,
+    tipoDeSala,
+    categoriaDeSala,
+    fecha,
+    horarioInicio,
+    horarioFin,
+    cantidadPersonas,
+  } = req.body;
+
+  try {
+    const { reserva, nombreSala, precioTotal } = await reservasServices.crearReserva(
       idUsuario,
       tipoDeSala,
       categoriaDeSala,
       fecha,
       horarioInicio,
       horarioFin,
-      cantidadPersonas,
-    } = req.body;
+      cantidadPersonas
+    );
 
-    try {
-      const {reserva, nombreSala} = await reservasServices.crearReserva(
-        idUsuario,
-        tipoDeSala,
-        categoriaDeSala,
-        fecha,
-        horarioInicio,
-        horarioFin,
-        cantidadPersonas
-      );
-      return res.status(201).json({
-        message: "Reserva creada con éxito",
-        reserva,
-        nombreSala
-      });
-    } catch (error) {
-      return res.status(400).json({
-        message: error.message,
-      });
-    }
+    return res.status(201).json({
+      message: "Reserva creada con éxito",
+      reserva,
+      nombreSala,
+      precioTotal: `Precio total a pagar: ${precioTotal} ARS`, // Mostrar el precio total calculado
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
 };
+
 
 //PUT
 const actualizarUnaReserva = async (req, res) => {
