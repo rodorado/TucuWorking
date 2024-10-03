@@ -2,7 +2,8 @@ const ReservasModel = require("../models/reservas.schemas");
 const SalasModel = require("../models/salas.schemas"); 
 const TipoModel = require("../models/tipos.schemas");
 const CategoriaModel = require("../models/categorias.schemas");
-const {MercadoPagoConfig, Preference} = require('mercadopago')
+const {MercadoPagoConfig, Preference} = require('mercadopago');
+const usuarioModel = require("../models/usuarios.schemas");
 
 //GET
 const obtenerTodasLasReservas = async () => {
@@ -33,6 +34,13 @@ const crearReserva = async (
   horarioFin,
   cantidadPersonas
 ) => {
+  const usuario = await usuarioModel.findById(usuarioId);
+  
+  if (!usuario) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  const emailUsuario = usuario.email; 
   try {
     const fechaReserva = new Date(fecha);
     console.log(`Fecha de reserva: ${fechaReserva}`);
@@ -130,7 +138,7 @@ const crearReserva = async (
         });
 
         await nuevaReserva.save();
-        return { reserva: nuevaReserva, nombreSala: otraSala.nombre, precioTotal };
+        return { reserva: nuevaReserva, nombreSala: otraSala.nombre, precioTotal, emailUsuario };
       }
     }
 
