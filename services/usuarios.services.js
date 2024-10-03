@@ -186,7 +186,7 @@ const solicitarRecuperacionContrasenia = async (email) => {
     usuario.tokenRecuperacion = token;
     usuario.expiracionToken = Date.now() + 3600000; // 1 hora desde ahora
     await usuario.save();
-    msgRecuContrasenia(email, token);
+    msgRecuContrasenia({email}, token);
     return { error: false, msg: 'Correo de recuperación enviado' };
   } catch (error) {
     console.log(error);

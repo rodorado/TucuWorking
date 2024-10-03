@@ -27,7 +27,40 @@ const registroUsuario = async(emailUsuario) =>  {
     
   };
 
+ 
+
+const registroReserva = async (emailUsuario, { nombreSala, fecha, horarioInicio, horarioFin, precioTotal }) => {
+  try {
+    // Formato del correo
+    await transporter.sendMail({
+      from: `Reservas - Sala Eventos <${process.env.GMAIL_USER}>`,
+      to: emailUsuario, // Correo del usuario
+      subject: "Reserva confirmada", // Asunto
+      html: `
+        <div>
+          <h2>Reserva confirmada</h2>
+          <p>¡Gracias por realizar tu reserva! Aquí tienes los detalles:</p>
+          <ul>
+            <li><strong>Sala:</strong> ${nombreSala}</li>
+            <li><strong>Fecha:</strong> ${new Date(fecha).toLocaleDateString()}</li>
+            <li><strong>Horario de inicio:</strong> ${horarioInicio}</li>
+            <li><strong>Horario de fin:</strong> ${horarioFin}</li>
+            <li><strong>Precio total:</strong> ${precioTotal} ARS</li>
+          </ul>
+          <p>¡Te esperamos!</p>
+        </div>
+      `, // Contenido HTML del correo
+    });
+    console.log("Correo de reserva enviado con éxito");
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+  }
+};
+
+
+
   module.exports = {
     registroUsuario,
-    msgRecuContrasenia
+    msgRecuContrasenia,
+    registroReserva
   }
