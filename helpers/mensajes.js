@@ -18,7 +18,7 @@ const registroUsuario = async(emailUsuario) =>  {
 
   const msgRecuContrasenia= async(email, token) => {
     await transporter.sendMail({
-      from: process.env.GMAIL_USER,
+    from: process.env.GMAIL_USER,
     to: email,
     subject: 'Recuperación de contraseña',
     text: `Para restablecer tu contraseña,

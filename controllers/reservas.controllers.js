@@ -41,12 +41,11 @@ const crearUnaReserva = async (req, res) => {
     fecha,
     horarioInicio,
     horarioFin,
-    cantidadPersonas,
-    emailUsuario
+    cantidadPersonas
   } = req.body;
 
   try {
-    const { reserva, nombreSala, precioTotal } = await reservasServices.crearReserva(
+    const { reserva, nombreSala, precioTotal, emailUsuario } = await reservasServices.crearReserva(
       idUsuario,
       tipoDeSala,
       categoriaDeSala,
@@ -55,6 +54,7 @@ const crearUnaReserva = async (req, res) => {
       horarioFin,
       cantidadPersonas
     );
+
     // Enviar correo de confirmación de reserva
     await registroReserva(emailUsuario, {
       nombreSala,
