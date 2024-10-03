@@ -84,11 +84,10 @@ const crearReserva = async (
     console.log(`Sala disponible: ${salaDisponible}`);
 
     if (!salaDisponible) {
-      throw new Error(
-        "No hay salas disponibles para la fecha y horario seleccionados"
-      );
+      throw new Error("No hay salas disponibles para la fecha y horario seleccionados");
     }
 
+    // Si la sala no tiene capacidad suficiente, buscar otra sala
     if (totalReservas + cantidadPersonas > salaDisponible.capacidad) {
       const otraSala = await SalasModel.findOne({
         tipoDeSala: tipoDeSala._id,
@@ -100,106 +99,62 @@ const crearReserva = async (
       console.log(`Otra sala disponible: ${otraSala}`);
 
       if (!otraSala) {
-        throw new Error(
-          "Sala llena. No se encontró otra sala disponible con las mismas características."
-        );
+        throw new Error("Sala llena. No se encontró otra sala disponible con las mismas características.");
       } else {
-        // Validar horario de inicio y fin para evitar NaN
-        const horaInicio = new Date(`1970-01-01T${horarioInicio}:00Z`);
-        const horaFin = new Date(`1970-01-01T${horarioFin}:00Z`);
-
-        console.log(`Hora inicio: ${horaInicio}, Hora fin: ${horaFin}`);
-
-        // Validar si la hora es válida antes de calcular
-        if (isNaN(horaInicio.getTime()) || isNaN(horaFin.getTime())) {
-          throw new Error("Horario de inicio o fin inválido.");
-        }
-
-        const duracionEnHoras = (horaFin - horaInicio) / (1000 * 60 * 60);
-        console.log(`Duración en horas: ${duracionEnHoras}`);
-
-        // Validar si precioPorHora es válido
-        if (typeof otraSala.precio !== 'number' || isNaN(duracionEnHoras)) {
-          throw new Error("Error al calcular el precio total.");
-        }
-
-        const precioTotal = otraSala.precio * duracionEnHoras;
-        console.log(`Precio total: ${precioTotal}`);
-
-        const nuevaReserva = new ReservasModel({
-          idUsuario: usuarioId,
-          idSala: otraSala._id,
-          nombreSala: otraSala.nombre,
-          fecha: fechaReserva,
-          horarioInicio,
-          horarioFin,
-          cantidadPersonas,
-          precioTotal,
-        });
-
-        await nuevaReserva.save();
-        return { reserva: nuevaReserva, nombreSala: otraSala.nombre, precioTotal };
+        return await procesarReserva(usuarioId, otraSala, fechaReserva, horarioInicio, horarioFin, cantidadPersonas, emailUsuario);
       }
     }
 
-    // Calcular la duración en horas
-    const [horaInicio, minutoInicio] = horarioInicio.split(":").map(Number);
-    const [horaFin, minutoFin] = horarioFin.split(":").map(Number);
+    return await procesarReserva(usuarioId, salaDisponible, fechaReserva, horarioInicio, horarioFin, cantidadPersonas, emailUsuario);
 
-    // Validar los horarios
-    if (
-      isNaN(horaInicio) || isNaN(minutoInicio) ||
-      isNaN(horaFin) || isNaN(minutoFin)
-    ) {
-      throw new Error("Horario de inicio o fin inválido.");
-    }
-
-    const inicio = new Date(fechaReserva);
-    inicio.setHours(horaInicio, minutoInicio, 0, 0);
-
-    const fin = new Date(fechaReserva);
-    fin.setHours(horaFin, minutoFin, 0, 0);
-
-    console.log(`Inicio: ${inicio}, Fin: ${fin}`);
-
-    if (fin <= inicio) {
-      throw new Error("El horario de fin debe ser mayor al horario de inicio.");
-    }
-
-    const duracionEnHoras = (fin - inicio) / (1000 * 60 * 60);
-    console.log(`Duración en horas: ${duracionEnHoras}`);
-
-    // Validar si precioPorHora es válido
-    const precio = salaDisponible.precio;
-    console.log(`Precio por hora: ${precio}`);
-
-    if (typeof precio !== 'number' || isNaN(precio)) {
-      throw new Error("Precio por hora de la sala inválido.");
-    }
-
-    // Calcular el precio total
-    const precioTotal = precio * duracionEnHoras;
-    console.log(`Precio total: ${precioTotal}`);
-
-    const nuevaReserva = new ReservasModel({
-      idUsuario: usuarioId,
-      idSala: salaDisponible._id,
-      nombreSala: salaDisponible.nombre,
-      fecha: fechaReserva,
-      horarioInicio,
-      horarioFin,
-      cantidadPersonas,
-      precioTotal, 
-    });
-
-    await nuevaReserva.save();
-    console.log("Reserva creada:", nuevaReserva);
-
-    return { reserva: nuevaReserva, nombreSala: salaDisponible.nombre, precioTotal, emailUsuario };
   } catch (error) {
     throw new Error(error.message);
   }
 };
+
+// Función para procesar la reserva y el pago
+const procesarReserva = async (usuarioId, sala, fechaReserva, horarioInicio, horarioFin, cantidadPersonas, emailUsuario) => {
+  // Validar horario de inicio y fin para evitar NaN
+  const horaInicio = new Date(`1970-01-01T${horarioInicio}:00Z`);
+  const horaFin = new Date(`1970-01-01T${horarioFin}:00Z`);
+
+  if (horaFin <= horaInicio) {
+    throw new Error("El horario de fin debe ser mayor al horario de inicio.");
+  }
+
+  const duracionEnHoras = (horaFin - horaInicio) / (1000 * 60 * 60);
+  const precioTotal = sala.precio * duracionEnHoras;
+
+  const nuevaReserva = new ReservasModel({
+    idUsuario: usuarioId,
+    idSala: sala._id,
+    nombreSala: sala.nombre,
+    fecha: fechaReserva,
+    horarioInicio,
+    horarioFin,
+    cantidadPersonas,
+    precioTotal,
+  });
+
+  await nuevaReserva.save();
+  console.log("Reserva creada:", nuevaReserva);
+
+  // Iniciar el proceso de pago con Mercado Pago
+  const paymentResult = await pagoConMP({
+    items: [{
+      title: sala.nombre,
+      quantity: 1,
+      unit_price: precioTotal,
+    }],
+    successUrl: 'http://localhost:front/success',  
+    failureUrl: 'http://localhost:front/failure',
+    pendingUrl: 'http://localhost:front/pending',
+  });
+
+  // Retornar la reserva y la URL de pago
+  return { reserva: nuevaReserva, paymentUrl: paymentResult.result.init_point, emailUsuario };
+};
+
 //PUT
  const actualizarReserva = async (body, idReserva) => {
   try {
@@ -231,22 +186,15 @@ const borrarReserva = async (idReserva) => {
 const pagoConMP = async(body) =>{
  const cliente = new MercadoPagoConfig({accessToken: process.env.MP_ACCESS_TOKEN})
  const preference = new Preference(cliente)
+ const { items, successUrl, failureUrl, pendingUrl } = body
+
  const result = await preference.create({
   body:{
-    items: [
-      {
-        id: '1234', 
-        title: 'Reserva de Sala', 
-        description: 'Reserva para la sala premium', 
-        quantity: 1, 
-        currency_id: 'ARS', 
-        unit_price: 1500 
-      }
-    ],
+    items: items,
     back_urls:{
-      success:'frontyadeployado',
-      failure:'front',
-      pending:'front'
+      success: successUrl || 'http://localhost:front',  
+        failure: failureUrl || 'http://localhost:front',
+        pending: pendingUrl || 'http://localhost:'
     },
     auto_return: 'approved'
   }

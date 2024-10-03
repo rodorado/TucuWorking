@@ -33,9 +33,14 @@ const ReservaSchema = new mongoose.Schema({
     default: "pendiente",
   },
   precioTotal: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Sala",
     type: Number,
+    required: true, // Corrige aquí si es necesario
+  },
+  preferenceId: { 
+    type: String, // ID de la preferencia de Mercado Pago
+  },
+  paymentUrl: {  // URL para redirigir a Mercado Pago
+    type: String,
   },
   createdAt: {
     type: Date,
@@ -43,5 +48,5 @@ const ReservaSchema = new mongoose.Schema({
   },
 });
 
-const ReservasModels = mongoose.model("reserva", ReservaSchema);
+const ReservasModels = mongoose.model("Reserva", ReservaSchema);
 module.exports = ReservasModels;
