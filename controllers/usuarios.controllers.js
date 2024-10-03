@@ -79,8 +79,6 @@ const inciarSesionUsuario = async (req, res) => {
   }
 };
 
-
-
 //PUT EDITAR USUARIO
 const editarUsuario = async (req, res) => {
   try {
@@ -93,7 +91,6 @@ const editarUsuario = async (req, res) => {
     const id = req.params.idUsuario;
     const data = req.body;
 
-    // Verificación de rol permitido
     if (data.rol && data.rol !== 'usuario' && data.rol !== 'admin') {
       return res.status(400).json({ msg: 'Error: Rol incorrecto. Solo se puede ser usuario o admin.' });
     }
@@ -107,9 +104,6 @@ const editarUsuario = async (req, res) => {
     res.status(500).json({ msg: "Error al editar usuario", error });
   }
 };
-
-
-
 
 //DELETE fisico
 const bajaFisicaUsuario = async(req, res) => {
@@ -133,25 +127,19 @@ const bajaLogicaUsuario = async(req, res) => {
   }
 };
 
-//Recuperacion Contraseña
-
-//solicitar
+//RECUPERACIÓN DE CONTRASEÑA
 const solicitarRecuContrasenia = async (req, res) => {
-  const { email } = req.body; // Extrae el email del cuerpo de la solicitud
-  const resultado = await usuariosServices.solicitarRecuperacionContrasenia(email); // Pasa el email al servicio
-  res.status(resultado.error ? 400 : 200).send(resultado); // Envía la respuesta con el estado adecuado
+  const { email } = req.body;
+  const resultado = await usuariosServices.solicitarRecuperacionContrasenia(email);
+  res.status(resultado.error ? 400 : 200).send(resultado); 
 };
 
-
-//restablecer
 const restablecerContrasenia = async (req, res) => {
   const { token } = req.params;
   const { nuevaContrasenia } = req.body;
   const resultado = await usuariosServices.restablecerContrasenia(token, nuevaContrasenia);
   res.status(resultado.error ? 400 : 200).send(resultado);
 };
-
-
 
 module.exports = {
   registrarUsuario,
