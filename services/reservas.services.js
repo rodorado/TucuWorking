@@ -2,6 +2,7 @@ const ReservasModel = require("../models/reservas.schemas");
 const SalasModel = require("../models/salas.schemas"); 
 const TipoModel = require("../models/tipos.schemas");
 const CategoriaModel = require("../models/categorias.schemas");
+const {MercadoPagoConfig, Preference} = require('mercadopago')
 
 //GET
 const obtenerTodasLasReservas = async () => {
@@ -219,11 +220,40 @@ const borrarReserva = async (idReserva) => {
   }
 };
 
+const pagoConMP = async(body) =>{
+ const cliente = new MercadoPagoConfig({accessToken: process.env.MP_ACCESS_TOKEN})
+ const preference = new Preference(cliente)
+ const result = await preference.create({
+  body:{
+    items: [
+      {
+        id: '1234', // ID de tu reserva
+        title: 'Reserva de Sala', // Nombre del ítem
+        description: 'Reserva para la sala premium', // Descripción del ítem
+        quantity: 1, // Cantidad de ítems (puede ser 1 para una reserva)
+        currency_id: 'ARS', // Moneda
+        unit_price: 1500 // Precio unitario en ARS
+      }
+    ],
+    back_urls:{
+      success:'frontyadeployado',
+      failure:'front',
+      pending:'front'
+    },
+    auto_return: 'approved'
+  }
+ })
+ return {
+  result, statusCode:200
+ }
+}
+
 
 module.exports = {
   crearReserva,
   obtenerTodasLasReservas,
   obtenerUnaReserva,
   actualizarReserva,
-  borrarReserva
+  borrarReserva,
+  pagoConMP
 };

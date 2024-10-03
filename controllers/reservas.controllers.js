@@ -1,5 +1,6 @@
 const reservasServices = require("../services/reservas.services");
 const { validationResult } = require("express-validator");
+const {registroReserva} = require("../helpers/mensajes")
 
 //GET
 const obtenerReservas = async (req, res) => {
@@ -41,6 +42,7 @@ const crearUnaReserva = async (req, res) => {
     horarioInicio,
     horarioFin,
     cantidadPersonas,
+    emailUsuario
   } = req.body;
 
   try {
@@ -53,7 +55,14 @@ const crearUnaReserva = async (req, res) => {
       horarioFin,
       cantidadPersonas
     );
-
+    // Enviar correo de confirmación de reserva
+    await registroReserva(emailUsuario, {
+      nombreSala,
+      fecha,
+      horarioInicio,
+      horarioFin,
+      precioTotal
+    });
     return res.status(201).json({
       message: "Reserva creada con éxito",
       reserva,
@@ -105,6 +114,19 @@ const eliminarUnaReserva = async (req, res) => {
   }
 };
 
+//MERCADOPAGO
+
+const mercadoPago = async(req, res) => {
+  try {
+    const resultMp = await reservasServices.pagoConMP(req.body)
+   if(resultMp.statusCode === 200){
+    res.status(200).json(resultMp.result.init_point)
+   }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 
 module.exports = {
@@ -112,5 +134,6 @@ module.exports = {
   obtenerReserva,
   obtenerReservas,
   actualizarUnaReserva,
-  eliminarUnaReserva
+  eliminarUnaReserva,
+  mercadoPago
 };
