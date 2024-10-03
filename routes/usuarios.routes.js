@@ -159,32 +159,28 @@ router.post("/login", loginValidaciones, inciarSesionUsuario)
  *      tags: [Usuario]
  *      parameters:
  *          - in: path
- *              name: id
- *              schema:
- *                  type: String
- *              require: true
- *              description: id unico
+ *            name: id
+ *            schema:
+ *              type: String
+ *            required: true  // Cambiado a required
+ *            description: id único del usuario
  *      requestBody:
  *          required: true
  *          content:
  *              application/json:
  *                  schema:
- *                      type: object
- *                      $ref: '#/components/schemas/Usuarios'
+ *                      $ref: '#/components/schemas/Usuarios' 
  *      responses: 
  *          200:
- *              description: Usuario modificado con exito
+ *              description: Usuario modificado con éxito
  *              content:
  *                  application/json:
  *                      schema:
- *                          type: object
- *                          items:
- *                           $ref: '#/components/schemas/Usuarios'
+ *                          $ref: '#/components/schemas/Usuarios'  
  *          400:
  *              description: Error usuario no encontrado
- *      
- *                  
  */
+
 router.put("/:idUsuario", registroValidaciones,editarUsuario)
 
 //Baja logica
@@ -199,25 +195,22 @@ router.put("/:idUsuario/borradoLogico", bajaLogicaUsuario)
  *      tags: [Usuario]
  *      parameters:
  *          - in: path
- *              name: id
- *              schema:
- *                  type: String
- *              require: true
- *              description: id unico
+ *            name: id
+ *            schema:
+ *              type: String
+ *            required: true  
+ *            description: id único del usuario
  *      responses: 
  *          200:
- *              description: Usuario eliminado con exito
+ *              description: Usuario eliminado con éxito
  *              content:
  *                  application/json:
  *                      schema:
- *                          type: object
- *                          items:
- *                           $ref: '#/components/schemas/Usuarios'
+ *                          $ref: '#/components/schemas/Usuarios'  
  *          400:
  *              description: Error usuario no encontrado
- *      
- *                  
  */
+
 router.delete("/:idUsuario", auth('admin'), bajaFisicaUsuario)
 
 //Restablecer contraseña
