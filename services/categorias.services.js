@@ -48,9 +48,6 @@ const crearCategoria = (body) => {
   };
 
 
-
-
-
 module.exports ={
     obtenerTodasLasCategorias,
     obtenerUnaCategoria,

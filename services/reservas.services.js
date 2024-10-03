@@ -138,7 +138,7 @@ const crearReserva = async (
         });
 
         await nuevaReserva.save();
-        return { reserva: nuevaReserva, nombreSala: otraSala.nombre, precioTotal, emailUsuario };
+        return { reserva: nuevaReserva, nombreSala: otraSala.nombre, precioTotal };
       }
     }
 
@@ -195,7 +195,7 @@ const crearReserva = async (
     await nuevaReserva.save();
     console.log("Reserva creada:", nuevaReserva);
 
-    return { reserva: nuevaReserva, nombreSala: salaDisponible.nombre, precioTotal };
+    return { reserva: nuevaReserva, nombreSala: salaDisponible.nombre, precioTotal, emailUsuario };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -235,12 +235,12 @@ const pagoConMP = async(body) =>{
   body:{
     items: [
       {
-        id: '1234', // ID de tu reserva
-        title: 'Reserva de Sala', // Nombre del ítem
-        description: 'Reserva para la sala premium', // Descripción del ítem
-        quantity: 1, // Cantidad de ítems (puede ser 1 para una reserva)
-        currency_id: 'ARS', // Moneda
-        unit_price: 1500 // Precio unitario en ARS
+        id: '1234', 
+        title: 'Reserva de Sala', 
+        description: 'Reserva para la sala premium', 
+        quantity: 1, 
+        currency_id: 'ARS', 
+        unit_price: 1500 
       }
     ],
     back_urls:{

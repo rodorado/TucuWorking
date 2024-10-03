@@ -14,7 +14,7 @@ router.post("/", registroValidaciones, registrarUsuario)
 //LOGIN
 router.post("/login", loginValidaciones, inciarSesionUsuario)
 //PUT Editar
-router.put("/:idUsuario", registroValidaciones, editarUsuario)
+router.put("/:idUsuario", registroValidaciones,editarUsuario)
 
 //Baja logica
 router.put("/:idUsuario/borradoLogico", bajaLogicaUsuario)
@@ -23,7 +23,6 @@ router.put("/:idUsuario/borradoLogico", bajaLogicaUsuario)
 router.delete("/:idUsuario", auth('admin'), bajaFisicaUsuario)
 
 //Restablecer contraseña
-
 router.post("/recuperar-contrasenia", solicitarRecuContrasenia)
 router.post("/restablecer-contrasenia/:token", restablecerContrasenia)
 
