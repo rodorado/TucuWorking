@@ -22,7 +22,7 @@ const obtenerUnaCategoriaPorIdOTodos = async (req, res) => {
   }
 };
 
-// Controlador para crear una nueva categoria
+// Crear una nueva categoria
 const crearUnaCategoria = async (req, res) => {
   try {
     const { errors } = validationResult(req);

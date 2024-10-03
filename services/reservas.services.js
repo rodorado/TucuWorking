@@ -2,6 +2,8 @@ const ReservasModel = require("../models/reservas.schemas");
 const SalasModel = require("../models/salas.schemas"); 
 const TipoModel = require("../models/tipos.schemas");
 const CategoriaModel = require("../models/categorias.schemas");
+const {MercadoPagoConfig, Preference} = require('mercadopago');
+const usuarioModel = require("../models/usuarios.schemas");
 
 //GET
 const obtenerTodasLasReservas = async () => {
@@ -32,6 +34,13 @@ const crearReserva = async (
   horarioFin,
   cantidadPersonas
 ) => {
+  const usuario = await usuarioModel.findById(usuarioId);
+  
+  if (!usuario) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  const emailUsuario = usuario.email; 
   try {
     const fechaReserva = new Date(fecha);
     console.log(`Fecha de reserva: ${fechaReserva}`);
@@ -186,7 +195,7 @@ const crearReserva = async (
     await nuevaReserva.save();
     console.log("Reserva creada:", nuevaReserva);
 
-    return { reserva: nuevaReserva, nombreSala: salaDisponible.nombre, precioTotal };
+    return { reserva: nuevaReserva, nombreSala: salaDisponible.nombre, precioTotal, emailUsuario };
   } catch (error) {
     throw new Error(error.message);
   }
@@ -219,11 +228,40 @@ const borrarReserva = async (idReserva) => {
   }
 };
 
+const pagoConMP = async(body) =>{
+ const cliente = new MercadoPagoConfig({accessToken: process.env.MP_ACCESS_TOKEN})
+ const preference = new Preference(cliente)
+ const result = await preference.create({
+  body:{
+    items: [
+      {
+        id: '1234', 
+        title: 'Reserva de Sala', 
+        description: 'Reserva para la sala premium', 
+        quantity: 1, 
+        currency_id: 'ARS', 
+        unit_price: 1500 
+      }
+    ],
+    back_urls:{
+      success:'frontyadeployado',
+      failure:'front',
+      pending:'front'
+    },
+    auto_return: 'approved'
+  }
+ })
+ return {
+  result, statusCode:200
+ }
+}
+
 
 module.exports = {
   crearReserva,
   obtenerTodasLasReservas,
   obtenerUnaReserva,
   actualizarReserva,
-  borrarReserva
+  borrarReserva,
+  pagoConMP
 };

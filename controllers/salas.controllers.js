@@ -1,12 +1,13 @@
 const salasServices = require("../services/salas.services");
 const { validationResult } = require("express-validator");
 
+//GET
 const obtenerUnaSalaPorIdOTodos = async (req, res) => {
   try {
     const id = req.params.idSala ? req.params.idSala : null;
     const limit = req.query.limit || 10;
     const to = req.query.to || 0;
-    const verDeshabilitadas = req.query.verDeshabilitadas === "true"; // Parámetro para ver deshabilitadas
+    const verDeshabilitadas = req.query.verDeshabilitadas === "true";
 
     if (id) {
       const sala = await salasServices.obtenerUnaSala(id);
@@ -24,33 +25,38 @@ const obtenerUnaSalaPorIdOTodos = async (req, res) => {
   }
 };
 
-// Controlador para crear una nueva sala// nuevo implementado
+// POST
 const crearUnaSala = async (req, res) => {
   try {
+    const { errors } = validationResult(req);
+    if (errors.length) {
+      return res.status(422).json({ message: errors[0].msg });
+    }
+
     const newSala = await salasServices.crearSala(req.body);
     res.status(201).json(newSala);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Error al crear la sala' });
+    res.status(500).json({ error: "Error al crear la sala" });
   }
 };
-
-
-// Controlador para editar una sala
+// PUT
 const editarUnaSala = async (req, res) => {
+  const { errors } = validationResult(req);
+  if (errors.length) {
+    return res.status(422).json({ message: errors[0].msg });
+  }
+  const idSala = req.params.idSala;
+  console.log("ID del sala a editar:", idSala);
   try {
-    const salaEditada = await salasServices.editarUnaSala(req.params.id, req.body);
-    res.status(200).json(salaEditada); // No necesitas la verificación adicional
+    const salaEditada = await salasServices.editarUnaSala(idSala, req.body);
+    res.status(200).json(salaEditada);
   } catch (error) {
-    console.log("Error en controlador:", error.message); // Mostrar el mensaje de error
-    res.status(500).json({ error: error.message }); // Proporcionar el mensaje de error en la respuesta
+    console.log("Error en controlador:", error.message);
+    res.status(500).json({ error: error.message });
   }
 };
-
-
-
-
-// Controlador para borrar una sala
+// DELETE
 const borrarUnaSala = async (req, res) => {
   try {
     const id = req.params.idSala;
@@ -61,6 +67,7 @@ const borrarUnaSala = async (req, res) => {
   }
 };
 
+//HABILITAR
 const habilitarSala = async (req, res) => {
   const result = await salasServices.habilitarSala(req.params.idSala);
   if (result.statusCode === 200) {
@@ -70,6 +77,7 @@ const habilitarSala = async (req, res) => {
   }
 };
 
+//DESHABILITAR
 const deshabilitarUnaSala = async (req, res) => {
   const result = await salasServices.deshabilitarSala(req.params.idSala);
   if (result.statusCode === 200) {
@@ -79,6 +87,7 @@ const deshabilitarUnaSala = async (req, res) => {
   }
 };
 
+//CLOUDINARY
 const agregarImagenSalaPorId = async (req, res) => {
   try {
     const resultado = await salasServices.agregarImagen(
