@@ -1,5 +1,6 @@
 const { check, body } = require('express-validator')
 const CategoriasModels = require('../models/categorias.schemas')
+const TipoModel = require('../models/tipos.schemas')
 
 const registroValidaciones = [
   check('nombreApellido', 'Campo vacio').not().isEmpty(),
@@ -61,14 +62,44 @@ const tiposValidaciones = [
 ];
 
 const reservasValidaciones = [
-    check('idUsuario', 'Campo vacio').not().isEmpty(),
-    check('tipoDeSala', 'Campo vacio').not().isEmpty(),
-    check('categoriaDeSala', 'Campo vacio').not().isEmpty(),
-    check('fecha', 'Campo vacio').not().isEmpty(),
-    check('horarioInicio', 'Campo vacio').not().isEmpty(),
-    check('horarioFin', 'Campo vacio').not().isEmpty(),
-    check('cantidadPersonas', 'Campo vacio').not().isEmpty(),
-]
+    check("idUsuario", "El id de usuario es obligatorio").notEmpty(),
+    check("tipoDeSala", "El tipo de sala es obligatorio").notEmpty(),
+    check("categoriaDeSala", "La categoría de sala es obligatoria").notEmpty(),
+    check("fecha", "La fecha debe tener un formato válido").isISO8601().toDate(),
+    check("cantidadPersonas", "La cantidad de personas debe ser un número entero positivo").isInt({ min: 1 }),
+    check("horarioInicio", "El horario de inicio debe tener el formato HH:mm").matches(/^([01]\d|2[0-3]):?([0-5]\d)$/),
+    check("horarioFin", "El horario de fin debe tener el formato HH:mm").matches(/^([01]\d|2[0-3]):?([0-5]\d)$/),
+  
+    // Validar que horarioFin sea mayor a horarioInicio
+    body("horarioFin").custom((value, { req }) => {
+      const [horaInicio, minutoInicio] = req.body.horarioInicio.split(":").map(Number);
+      const [horaFin, minutoFin] = value.split(":").map(Number);
+      const inicio = new Date(1970, 0, 1, horaInicio, minutoInicio);
+      const fin = new Date(1970, 0, 1, horaFin, minutoFin);
+  
+      if (fin <= inicio) {
+        throw new Error("El horario de fin debe ser mayor al de inicio");
+      }
+      return true;
+    }),
+  
+    // Validar tipo de sala y categoría de sala existentes
+    body("tipoDeSala").custom(async (tipoDeSala) => {
+      const tipo = await TipoModel.findOne({ nombre: tipoDeSala });
+      if (!tipo) {
+        throw new Error("El tipo de sala no es válido");
+      }
+      return true;
+    }),
+    body("categoriaDeSala").custom(async (categoriaDeSala) => {
+      const categoria = await CategoriasModels.findOne({ nombre: categoriaDeSala });
+      if (!categoria) {
+        throw new Error("La categoría de sala no es válida");
+      }
+      return true;
+    }),
+  ];
+  
 
 
 
